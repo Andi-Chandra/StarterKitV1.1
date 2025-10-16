@@ -10,7 +10,7 @@ You need to add these environment variables manually in your Vercel dashboard:
 ### 🔗 Supabase Configuration
 | Variable Name | Value | Type |
 |---------------|-------|------|
-| `NEXT_PUBLIC_SUPABASE_URL` | `https://rcxjtnojxtugtpjtydzu.supabase.co` | Public |
+| ` Public |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjeGp0bm9qeHR1Z3RwanR5ZHp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxMjIzOTAsImV4cCI6MjA3NTY5ODM5MH0.eYFfChSM7YwhjkArKlYiBfU1vAiwYekM7YlgBiO_RyU` | Public |
 | `SUPABASE_SERVICE_ROLE_KEY` | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjeGp0bm9qeHR1Z3RwanR5ZHp1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MDEyMjM5MCwiZXhwIjoyMDc1Njk4MzkwfQ.GKOCMCzhWfhzq7yLXErpiU9Zh81LbXXqPa98OeWyYsk` | Secret |
 | `DATABASE_URL` | `postgresql://postgres:4CIw4WpTyFbXYPu8@db.rcxjtnojxtugtpjtydzu.supabase.co:5432/postgres` | Secret |
@@ -87,7 +87,7 @@ You need to add these environment variables manually in your Vercel dashboard:
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=https://rcxjtnojxtugtpjtydzu.supabase.co
 
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjeGp0bm9qeHR1Z3RwanR5ZHp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxMjIzOTAsImV4cCI6MjA3NTY5ODM5MH0.eYFfChSM7YwhjkArKlYiBfU1vAiwYekM7YlgBiO_RyU
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6INEXT_PUBLIC_SUPABASE_URL` | `https://rcxjtnojxtugtpjtydzu.supabase.co` |nJjeGp0bm9qeHR1Z3RwanR5ZHp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxMjIzOTAsImV4cCI6MjA3NTY5ODM5MH0.eYFfChSM7YwhjkArKlYiBfU1vAiwYekM7YlgBiO_RyU
 
 NEXTAUTH_URL=https://your-domain.vercel.app
 

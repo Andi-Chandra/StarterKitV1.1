@@ -1,0 +1,170 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
+enum SliderType {
+  IMAGE
+  VIDEO
+  MIXED
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String?
+  avatarUrl    String?
+  role         UserRole  @default(USER)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  lastSignInAt DateTime?
+  
+  // Relations
+  createdMedia MediaItem[]
+  updatedConfig SiteConfig[]
+  
+  @@map("users")
+}
+
+model MediaCategory {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  mediaItems MediaItem[]
+  
+  @@map("media_categories")
+}
+
+model MediaItem {
+  id          String     @id @default(cuid())
+  title       String
+  description String?
+  fileUrl     String
+  fileType    MediaType
+  fileSize    Int?
+  dimensions  String?    // JSON string for {width: number, height: number}
+  isFeatured  Boolean    @default(false)
+  sortOrder   Int        @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  
+  // Foreign Keys
+  categoryId String?
+  createdBy  String?
+  
+  // Relations
+  category    MediaCategory? @relation(fields: [categoryId], references: [id])
+  creator     User?          @relation(fields: [createdBy], references: [id])
+  sliderItems SliderItem[]
+  
+  @@map("media_items")
+}
+
+model Slider {
+  id                String     @id @default(cuid())
+  name              String
+  type              SliderType
+  isActive          Boolean    @default(true)
+  autoPlay          Boolean    @default(true)
+  autoPlayInterval  Int        @default(5000) // milliseconds
+  loop              Boolean    @default(true)
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  
+  // Relations
+  items SliderItem[]
+  
+  @@map("sliders")
+}
+
+model SliderItem {
+  id               String   @id @default(cuid())
+  title            String?
+  subtitle         String?
+  callToAction     String?
+  callToActionUrl  String?
+  sortOrder        Int      @default(0)
+  createdAt        DateTime @default(now())
+  
+  // Foreign Keys
+  sliderId String
+  mediaId String
+  
+  // Relations
+  slider Slider @relation(fields: [sliderId], references: [id], onDelete: Cascade)
+  media  MediaItem @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  
+  @@map("slider_items")
+}
+
+model SiteConfig {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String   // JSON string
+  description String?
+  updatedAt   DateTime @updatedAt
+  
+  // Foreign Keys
+  updatedBy String?
+  
+  // Relations
+  updater User? @relation(fields: [updatedBy], references: [id])
+  
+  @@map("site_config")
+}
+
+model NavigationLink {
+  id         String   @id @default(cuid())
+  title      String
+  url        String
+  isExternal Boolean  @default(false)
+  sortOrder  Int      @default(0)
+  isActive   Boolean  @default(true)
+  parentId   String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  // Self-referencing relation for nested navigation
+  parent   NavigationLink?  @relation("NavigationHierarchy", fields: [parentId], references: [id])
+  children NavigationLink[] @relation("NavigationHierarchy")
+  
+  @@map("navigation_links")
+}
+
+model SocialMediaLink {
+  id        String   @id @default(cuid())
+  platform  String
+  url       String
+  iconName  String   // Lucide icon name
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("social_media_links")
+}

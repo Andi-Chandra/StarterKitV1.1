@@ -1,0 +1,33 @@
+# Modern Web App
+
+A modern, responsive web application built with Next.js 15, featuring content management capabilities, user authentication, and admin functionality.
+
+## 🚀 Features
+
+### Core Features
+- **Responsive Header** with company logo and navigation links
+- **Image Slider** with auto-play functionality using embla-carousel
+- **Image Gallery** with filtering, search, and pagination
+- **Video Slider** with custom controls
+- **Footer** with social media links and newsletter subscription
+- **Sign In/Sign Up** with authentication infrastructure
+- **Admin Dashboard** preparation with role-based access
+
+### Technical Features
+- **Database Integration** with Prisma ORM
+- **API Routes** for CRUD operations
+- **Type Safety** with TypeScript
+- **Modern UI** with shadcn/ui components
+- **Responsive Design** with Tailwind CSS
+- **Performance Optimized** with Next.js Image optimization
+- **Error Handling** with fallback UI
+
+## 🛠️ Tech Stack
+
+- **Framework**: Next.js 15 with App Router
+- **Language**: TypeScript 5
+- **Database**: SQLite with Prisma ORM
+- **UI Components**: shadcn/ui (Radix UI)
+- **Styling**: Tailwind CSS 4
+- **Icons**: Lucide React
+- **Carousel**: embla-carousel-r

@@ -195,3 +195,18 @@ npx prisma db push
 Notes
 - The Prisma enums were replaced by string fields to align with the Supabase `TEXT` columns (`role`, `file_type`, `type`). Zod still enforces values like `IMAGE`/`VIDEO` in the API layer.
 - If you prefer native Postgres enums, we can add a follow-up migration to convert these `TEXT` columns to enum types.
+
+### Recommended: Use the Prisma pooled connection string
+
+For serverless (e.g., Vercel) and Prisma, Supabase recommends using the pooled connection via PgBouncer on port 6543. In your Supabase Dashboard → Project Settings → Database → Connection Strings → Prisma, copy the Prisma URL and set it as `DATABASE_URL`:
+
+```env
+DATABASE_URL="postgresql://postgres:<password>@<pool-host>:6543/postgres?pgbouncer=true&sslmode=require"
+```
+
+This reduces connection overhead and avoids limits on direct connections. Use this same URL locally and in Vercel (Production/Preview/Development). After updating, run:
+
+```bash
+npm run db:generate
+npx prisma db push
+```

@@ -2,7 +2,7 @@
 
 A modern, responsive web application built with Next.js 15, featuring content management capabilities, user authentication, and admin functionality.
 
-## 🚀 Features
+## ?? Features
 
 ### Core Features
 - **Responsive Header** with company logo and navigation links
@@ -22,7 +22,7 @@ A modern, responsive web application built with Next.js 15, featuring content ma
 - **Performance Optimized** with Next.js Image optimization
 - **Error Handling** with fallback UI
 
-## 🛠️ Tech Stack
+## ??? Tech Stack
 
 - **Framework**: Next.js 15 with App Router
 - **Language**: TypeScript 5
@@ -35,7 +35,7 @@ A modern, responsive web application built with Next.js 15, featuring content ma
 - **State Management**: Zustand
 - **Development**: ESLint, TypeScript
 
-## 📦 Installation
+## ?? Installation
 
 1. **Clone the repository**
    ```bash
@@ -72,28 +72,28 @@ A modern, responsive web application built with Next.js 15, featuring content ma
 6. **Open your browser**
    Navigate to [http://localhost:3000](http://localhost:3000)
 
-## 📁 Project Structure
+## ?? Project Structure
 
 ```
 src/
-├── app/
-│   ├── api/          # API routes
-│   │   ├── media/    # Media management API
-│   │   └── sliders/  # Slider management API
-│   ├── components/   # React components
-│   ├── hooks/        # Custom hooks
-│   └── lib/          # Utilities and helpers
-├── components/
-│   ├── layout/       # Header, Footer components
-│   ├── media/        # Image/Video sliders and gallery
-│   └── ui/           # shadcn/ui components
-├── prisma/
-│   ├── schema.prisma # Database schema
-│   └── seed.ts       # Database seed script
-└── public/           # Static assets
++-- app/
+�   +-- api/          # API routes
+�   �   +-- media/    # Media management API
+�   �   +-- sliders/  # Slider management API
+�   +-- components/   # React components
+�   +-- hooks/        # Custom hooks
+�   +-- lib/          # Utilities and helpers
++-- components/
+�   +-- layout/       # Header, Footer components
+�   +-- media/        # Image/Video sliders and gallery
+�   +-- ui/           # shadcn/ui components
++-- prisma/
+�   +-- schema.prisma # Database schema
+�   +-- seed.ts       # Database seed script
++-- public/           # Static assets
 ```
 
-## 🗄️ Database Schema
+## ??? Database Schema
 
 The application uses the following main tables:
 
@@ -106,7 +106,7 @@ The application uses the following main tables:
 - **social_media_links** - Social media integration
 - **site_config** - Dynamic site settings
 
-## 🎨 Components
+## ?? Components
 
 ### Header Component
 - Responsive navigation with mobile menu
@@ -139,7 +139,7 @@ The application uses the following main tables:
 - Newsletter subscription
 - Multi-column layout
 
-## 🔧 Available Scripts
+## ?? Available Scripts
 
 ```bash
 # Development
@@ -157,7 +157,7 @@ npm run db:reset     # Reset database
 npm run lint         # Run ESLint
 ```
 
-## 🌐 API Routes
+## ?? API Routes
 
 ### Media Management
 - `GET /api/media` - Get all media items with pagination
@@ -174,7 +174,7 @@ npm run lint         # Run ESLint
 - `GET /api/sliders` - Get all sliders
 - `POST /api/sliders` - Create new slider
 
-## 🎯 Usage Examples
+## ?? Usage Examples
 
 ### Using the Image Slider
 ```typescript
@@ -212,7 +212,7 @@ import { Gallery } from '@/components/media/Gallery'
 />
 ```
 
-## 🔒 Security Features
+## ?? Security Features
 
 - **Type Safety** with TypeScript
 - **Input Validation** with Zod schemas
@@ -220,14 +220,14 @@ import { Gallery } from '@/components/media/Gallery'
 - **XSS Protection** with React's built-in safeguards
 - **Image Optimization** with Next.js Image component
 
-## 📱 Responsive Design
+## ?? Responsive Design
 
 The application is fully responsive with breakpoints:
 - **Mobile**: < 640px
 - **Tablet**: 640px - 1024px
 - **Desktop**: > 1024px
 
-## 🚀 Performance
+## ?? Performance
 
 - **Code Splitting** with Next.js automatic splitting
 - **Image Optimization** with Next.js Image component
@@ -235,7 +235,7 @@ The application is fully responsive with breakpoints:
 - **Optimized Bundle** with tree shaking
 - **Fast Refresh** during development
 
-## 🤝 Contributing
+## ?? Contributing
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
@@ -243,11 +243,11 @@ The application is fully responsive with breakpoints:
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📄 License
+## ?? License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🆘 Troubleshooting
+## ?? Troubleshooting
 
 ### Image Loading Issues
 If you encounter image loading errors, ensure:
@@ -261,35 +261,13 @@ If you encounter database issues:
 2. Run `npm run db:seed` to populate with sample data
 3. Check your `.env` file for correct DATABASE_URL
 
-## Supabase Postgres Setup (Production)
-
-For production/serverless deployments, use Supabase Postgres with Prisma’s pooled connection:
-
-- In Supabase Dashboard → Project Settings → Database → Connection strings → Prisma, copy the Prisma connection string (pooled, port 6543):
-  ```env
-  DATABASE_URL="postgresql://postgres:<password>@<pool-host>:6543/postgres?pgbouncer=true&sslmode=require"
-  ```
-- Generate and sync Prisma:
-  ```bash
-  npm run db:generate
-  npx prisma db push
-  ```
-- In Vercel, set `DATABASE_URL` (Production/Preview/Development) to the Prisma connection string and redeploy.
-
-Tip: For local development you can continue using SQLite with:
-```env
-DATABASE_URL="file:./prisma/db/custom.db"
-```
-2. Run `npm run db:seed` to populate with sample data
-3. Check your `.env` file for correct DATABASE_URL
-
 ### Development Server Issues
 If the development server doesn't start:
 1. Ensure all dependencies are installed (`npm install`)
 2. Check if port 3000 is available
 3. Clear node_modules and reinstall if needed
 
-## 📞 Support
+## ?? Support
 
 For support and questions:
 - Create an issue in the repository
@@ -298,4 +276,5 @@ For support and questions:
 
 ---
 
-**Built with ❤️ using Next.js, TypeScript, and modern web technologies**
+**Built with ?? using Next.js, TypeScript, and modern web technologies**
+

@@ -136,6 +136,55 @@ npx prisma migrate dev --name init_postgres
 ```bash
 npx prisma db push
 ```
+
+> Troubleshooting: "the URL must start with the protocol `postgresql://` or `postgres://`"
+
+If you see an error like:
+
+```
+Error validating datasource `db`: the URL must start with the protocol `postgresql://` or `postgres://`.
+```
+
+It means Prisma is not reading a Postgres DATABASE_URL. Common causes:
+
+- Prisma reads environment variables from a `.env` file by default (not `.env.local`). If you only have `DATABASE_URL` in `.env.local`, Prisma won't pick it up.
+- Your environment may have `DATABASE_URL` set to a SQLite URL (for example, `file:./dev.db`) or be unset.
+
+Fixes:
+
+1) Quick one-off (set the env var in your PowerShell session and run the command):
+
+```powershell
+$Env:DATABASE_URL = 'postgresql://postgres:<password>@<host>:5432/postgres?sslmode=require'
+npx prisma db push
+```
+
+2) Persisted fix — create a `.env` file at the repo root with the correct URL (Prisma will load this automatically):
+
+```text
+DATABASE_URL="postgresql://postgres:<password>@<host>:5432/postgres?sslmode=require"
+```
+
+3) If you prefer `.env.local`, copy it to `.env` before running Prisma:
+
+```powershell
+copy .env.local .env
+npx prisma db push
+```
+
+4) Verify what Prisma will use by printing the env var in PowerShell before running Prisma:
+
+```powershell
+Write-Output $Env:DATABASE_URL
+# or if not set in session, display the .env file contents
+Get-Content .env
+```
+
+After ensuring `DATABASE_URL` starts with `postgresql://` or `postgres://`, re-run:
+
+```bash
+npx prisma db push
+```
   - This should be a no-op if schemas match. If there is drift, Prisma will print the differences.
 
 6) Production deploy

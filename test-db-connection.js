@@ -1,6 +1,12 @@
 const { Client } = require('pg');
 
-const connectionString = "postgresql://postgres:TiGgmHFIryDDeNv8@db.rcxjtnojxtugtpjtydzu.supabase.co:5432/postgres?sslmode=require";
+// Prefer the environment DATABASE_URL so local/CI/Vercel secrets are authoritative.
+const fallback = "postgresql://postgres:TiGgmHFIryDDeNv8@db.rcxjtnojxtugtpjtydzu.supabase.co:5432/postgres?sslmode=require";
+const connectionString = process.env.DATABASE_URL || fallback;
+
+if (!process.env.DATABASE_URL) {
+  console.warn('⚠️  Using fallback hard-coded connection string in test-db-connection.js.\nPlease set DATABASE_URL in your environment or copy .env.local -> .env to avoid auth errors.');
+}
 
 async function testConnection() {
   const client = new Client({

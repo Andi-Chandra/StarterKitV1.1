@@ -102,3 +102,47 @@ After successful migration, your Next.js application will be fully powered by Su
 ---
 
 **Next Step**: Run the SQL migration in your Supabase Dashboard, then test your application!
+
+---
+
+## Switch Prisma to PostgreSQL (Supabase)
+
+If you want Prisma to use your Supabase Postgres instead of the bundled SQLite:
+
+1) Update Prisma datasource provider
+- Already applied in `prisma/schema.prisma`: `provider = "postgresql"`.
+- Columns are mapped to existing Supabase snake_case names via `@map` so Prisma matches the Supabase schema.
+
+2) Set `DATABASE_URL` to your Supabase connection string
+- In local `.env` or `.env.local`:
+  - `DATABASE_URL="postgresql://postgres:<password>@<host>:5432/postgres?sslmode=require"`
+- In Vercel Project → Settings → Environment Variables (Production/Preview/Development):
+  - `DATABASE_URL` with the same Postgres URL
+
+3) Generate Prisma Client
+```bash
+npm run db:generate
+```
+
+4) Create and apply a migration (new/empty DB)
+- For a new, empty Supabase project (no tables yet), let Prisma create the schema:
+```bash
+npx prisma migrate dev --name init_postgres
+```
+
+5) Using existing Supabase tables (recommended)
+- If you have already run `SUPABASE_MIGRATION.sql` in Supabase, the tables exist and match the Prisma `@map`ped columns.
+- In that case, prefer syncing the Prisma schema to the DB without creating new tables:
+```bash
+npx prisma db push
+```
+  - This should be a no-op if schemas match. If there is drift, Prisma will print the differences.
+
+6) Production deploy
+- Vercel: Ensure `DATABASE_URL` is set to the Supabase URL.
+- Redeploy the app.
+- Health check: `GET /api/health` should return `{ ok: true }`.
+
+Notes
+- The Prisma enums were replaced by string fields to align with the Supabase `TEXT` columns (`role`, `file_type`, `type`). Zod still enforces values like `IMAGE`/`VIDEO` in the API layer.
+- If you prefer native Postgres enums, we can add a follow-up migration to convert these `TEXT` columns to enum types.

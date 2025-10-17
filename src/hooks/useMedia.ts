@@ -72,7 +72,16 @@ export function useMedia() {
 
         // Fetch media items and categories
         const mediaResponse = await fetch('/api/media?limit=20')
-        if (!mediaResponse.ok) throw new Error('Failed to fetch media')
+        if (!mediaResponse.ok) {
+          let message = 'Failed to fetch media'
+          try {
+            const err = await mediaResponse.json()
+            if (err?.message) message = err.message
+          } catch {
+            // ignore JSON parse errors
+          }
+          throw new Error(message)
+        }
         const mediaData = await mediaResponse.json()
         
         setMediaItems(mediaData.mediaItems || [])

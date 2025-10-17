@@ -224,7 +224,7 @@ export async function GET(request: NextRequest) {
         )
       }
       return NextResponse.json(
-        { code: e.code, message: 'Database request error' },
+        { code: e.code, message: 'Database request error', detail: e.message },
         { status: 500 }
       )
     }

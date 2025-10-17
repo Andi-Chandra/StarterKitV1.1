@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { Prisma } from '@prisma/client'
-import { db } from '@/lib/db'
+import { db, getEffectiveDatabaseUrl } from '@/lib/db'
 
 export const runtime = 'nodejs'
 
@@ -14,7 +14,7 @@ export async function GET() {
     // Use a lightweight query that works for SQLite
     await db.$queryRaw`SELECT 1`
 
-    const payload = {
+    const payload: any = {
       ok: true,
       runtime: process.env.NODE_ENV || 'development',
       prisma: { version: Prisma.prismaVersion.client },
@@ -23,11 +23,14 @@ export async function GET() {
       latencyMs: Date.now() - startedAt,
       timestamp: new Date().toISOString(),
     }
+    if (process.env.DEBUG_HEALTH_DB_PATH === 'true') {
+      payload.db.path = getEffectiveDatabaseUrl()
+    }
 
     return NextResponse.json(payload, { status: 200 })
   } catch (error) {
     const e = error as any
-    const payload = {
+    const payload: any = {
       ok: false,
       runtime: process.env.NODE_ENV || 'development',
       prisma: { version: Prisma.prismaVersion.client },
@@ -36,9 +39,11 @@ export async function GET() {
       latencyMs: Date.now() - startedAt,
       timestamp: new Date().toISOString(),
     }
+    if (process.env.DEBUG_HEALTH_DB_PATH === 'true') {
+      payload.db.path = getEffectiveDatabaseUrl()
+    }
 
     // Service Unavailable so external checks can detect failure
     return NextResponse.json(payload, { status: 503 })
   }
 }
-

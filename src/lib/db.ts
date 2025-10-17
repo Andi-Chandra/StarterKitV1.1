@@ -49,6 +49,10 @@ function resolveSqliteUrlForServerless(defaultUrl?: string) {
 
 const effectiveUrl = resolveSqliteUrlForServerless(process.env.DATABASE_URL)
 
+export function getEffectiveDatabaseUrl() {
+  return effectiveUrl || process.env.DATABASE_URL || null
+}
+
 export const db =
   (globalForPrisma.prisma as PrismaClient | undefined) ??
   new PrismaClient({

@@ -63,6 +63,7 @@ export function useMedia() {
   const [navigationLinks, setNavigationLinks] = useState<NavigationLink[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [errorCode, setErrorCode] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchData() {
@@ -73,14 +74,16 @@ export function useMedia() {
         // Fetch media items and categories
         const mediaResponse = await fetch('/api/media?limit=20')
         if (!mediaResponse.ok) {
-          let message = 'Failed to fetch media'
           try {
             const err = await mediaResponse.json()
-            if (err?.message) message = err.message
+            const message = err?.message || 'Failed to fetch media'
+            const code = err?.code || err?.error || null
+            setError(message + (code ? ` (${code})` : ''))
+            if (code) setErrorCode(code)
           } catch {
-            // ignore JSON parse errors
+            setError('Failed to fetch media')
           }
-          throw new Error(message)
+          return
         }
         const mediaData = await mediaResponse.json()
         
@@ -89,7 +92,18 @@ export function useMedia() {
 
         // Fetch sliders
         const slidersResponse = await fetch('/api/sliders?active=true')
-        if (!slidersResponse.ok) throw new Error('Failed to fetch sliders')
+        if (!slidersResponse.ok) {
+          try {
+            const err = await slidersResponse.json()
+            const message = err?.message || 'Failed to fetch sliders'
+            const code = err?.code || err?.error || null
+            setError(message + (code ? ` (${code})` : ''))
+            if (code) setErrorCode(code)
+          } catch {
+            setError('Failed to fetch sliders')
+          }
+          return
+        }
         const slidersData = await slidersResponse.json()
         
         setSliders(slidersData.sliders || [])
@@ -144,7 +158,8 @@ export function useMedia() {
         ])
 
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred')
+        const message = err instanceof Error ? err.message : 'An error occurred'
+        setError(message)
         console.error('Error fetching data:', err)
       } finally {
         setLoading(false)
@@ -160,6 +175,7 @@ export function useMedia() {
     sliders,
     navigationLinks,
     loading,
-    error
+    error,
+    errorCode
   }
 }

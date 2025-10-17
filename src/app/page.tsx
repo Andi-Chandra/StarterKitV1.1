@@ -64,12 +64,17 @@ function LoadingSkeleton() {
   )
 }
 
-function ErrorState({ error }: { error: string }) {
+function ErrorState({ error, code }: { error: string; code?: string }) {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center">
       <div className="text-center">
         <h1 className="text-2xl font-bold mb-4">Something went wrong</h1>
-        <p className="text-muted-foreground mb-4">{error}</p>
+        <p className="text-muted-foreground mb-2">{error}</p>
+        {code ? (
+          <p className="text-xs text-muted-foreground mb-4">Error code: {code}</p>
+        ) : (
+          <div className="mb-4" />
+        )}
         <Button onClick={() => window.location.reload()}>
           Try Again
         </Button>
@@ -79,14 +84,14 @@ function ErrorState({ error }: { error: string }) {
 }
 
 export default function Home() {
-  const { mediaItems, categories, sliders, navigationLinks, loading, error } = useMedia()
+  const { mediaItems, categories, sliders, navigationLinks, loading, error, errorCode } = useMedia()
 
   if (loading) {
     return <LoadingSkeleton />
   }
 
   if (error) {
-    return <ErrorState error={error} />
+    return <ErrorState error={error} code={errorCode ?? undefined} />
   }
 
   // Transform data for components

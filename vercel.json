@@ -8,6 +8,14 @@
     "src/app/api/**/*.ts": {
       "maxDuration": 30,
       "includeFiles": "prisma/**"
+    },
+    "app/**/route.js": {
+      "maxDuration": 30,
+      "includeFiles": "prisma/**"
+    },
+    "app/**/route.mjs": {
+      "maxDuration": 30,
+      "includeFiles": "prisma/**"
     }
   },
   "headers": [

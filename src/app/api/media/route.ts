@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+export const runtime = 'nodejs'
 import { z } from 'zod'
 import { db } from '@/lib/db'
 import { Prisma } from '@prisma/client'

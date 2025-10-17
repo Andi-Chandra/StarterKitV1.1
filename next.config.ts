@@ -45,6 +45,11 @@ const nextConfig: NextConfig = {
     }
     return config;
   },
+  experimental: {
+    outputFileTracingIncludes: {
+      '/api/(.*)': ['./prisma/**'],
+    },
+  },
   eslint: {
     // 构建时忽略ESLint错误
     ignoreDuringBuilds: true,

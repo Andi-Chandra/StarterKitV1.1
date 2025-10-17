@@ -196,6 +196,27 @@ Notes
 - The Prisma enums were replaced by string fields to align with the Supabase `TEXT` columns (`role`, `file_type`, `type`). Zod still enforces values like `IMAGE`/`VIDEO` in the API layer.
 - If you prefer native Postgres enums, we can add a follow-up migration to convert these `TEXT` columns to enum types.
 
+## Quick HOWTO: helpers for running tests and migrations
+
+Two helper scripts were added to make local testing and migrations more reliable:
+
+- `node scripts/run-test-with-env.js` — reads `DATABASE_URL` from `.env` and runs the DB connectivity test (`test-db-connection.js`).
+- `node scripts/run-prisma-direct.js` — reads `DIRECT_URL` from `.env`, sets it as `DATABASE_URL` for the process, and runs `npx prisma db push` (recommended for migrations).
+
+You can run them via npm scripts added to `package.json`:
+
+```powershell
+npm run db:test-env       # runs the DB connectivity test using DATABASE_URL from .env (pooler)
+npm run db:push:direct    # runs prisma db push using DIRECT_URL from .env (direct connection)
+```
+
+Notes:
+- Use `db:test-env` to verify runtime connectivity with the pooler (`DATABASE_URL` with `pgbouncer=true`).
+- Use `db:push:direct` for Prisma operations (migrations, db push) because Prisma works best with a direct Postgres connection (the script sets `DATABASE_URL` to `DIRECT_URL`).
+- Keep `.env`, `.env.local`, and your Vercel secrets in sync. The repo intentionally separates `DATABASE_URL` (pooler) and `DIRECT_URL` (direct) to avoid pgbouncer-related migration problems.
+
+If you'd like, I can also add a PowerShell helper script to copy `.env.local` → `.env` for quick local setup.
+
 ### Recommended: Use the Prisma pooled connection string
 
 For serverless (e.g., Vercel) and Prisma, Supabase recommends using the pooled connection via PgBouncer on port 6543. In your Supabase Dashboard → Project Settings → Database → Connection Strings → Prisma, copy the Prisma URL and set it as `DATABASE_URL`:

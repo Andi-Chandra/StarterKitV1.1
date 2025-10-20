@@ -293,7 +293,7 @@ export function Gallery({
                       <video
                         src={item.fileUrl}
                         controls
-                        className="w-full h-full"
+                        className="w-full h-full object-contain object-center bg-black"
                       />
                     )}
                   </div>

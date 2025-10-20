@@ -197,7 +197,7 @@ export function VideoSlider({
                       }}
                       src={video.videoUrl}
                       poster={video.thumbnailUrl}
-                      className="w-full h-full object-contain"
+                      className="w-full h-full object-contain object-center"
                       onTimeUpdate={() => handleTimeUpdate(video.id)}
                       onLoadedMetadata={() => handleLoadedMetadata(video.id)}
                       playsInline

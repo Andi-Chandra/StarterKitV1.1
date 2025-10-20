@@ -2,6 +2,98 @@ import { NextRequest, NextResponse } from 'next/server'
 export const runtime = 'nodejs'
 import { z } from 'zod'
 import { db } from '@/lib/db'
+import { Prisma } from '@prisma/client'
+
+function isDev() {
+  return process.env.NODE_ENV !== 'production'
+}
+
+function shouldProdFallback() {
+  const v = process.env.ENABLE_SLIDERS_API_FALLBACK || process.env.SLIDERS_API_FALLBACK
+  return v === 'true' || v === '1'
+}
+
+function mockSliders() {
+  const now = new Date().toISOString()
+  return [
+    {
+      id: 'mock-slider-image',
+      name: 'Homepage Image Slider',
+      type: 'IMAGE',
+      isActive: true,
+      autoPlay: true,
+      autoPlayInterval: 5000,
+      loop: true,
+      createdAt: now,
+      updatedAt: now,
+      items: [
+        {
+          id: 'mock-slide-1',
+          title: 'Welcome to Our Modern Web App',
+          subtitle: 'Experience the Future',
+          callToAction: 'Get Started',
+          callToActionUrl: '#features',
+          sortOrder: 1,
+          media: {
+            id: 'mock-media-hero',
+            title: 'Hero Image',
+            description: 'A beautiful hero image for the homepage',
+            fileUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1920&h=1080&fit=crop',
+            fileType: 'IMAGE',
+            fileSize: null,
+            dimensions: null,
+            isFeatured: true,
+            sortOrder: 1,
+            createdAt: now,
+            updatedAt: now,
+            categoryId: null,
+            createdBy: null,
+            category: null,
+            creator: null,
+          },
+        },
+      ],
+    },
+    {
+      id: 'mock-slider-video',
+      name: 'Homepage Video Slider',
+      type: 'VIDEO',
+      isActive: true,
+      autoPlay: false,
+      autoPlayInterval: 8000,
+      loop: true,
+      createdAt: now,
+      updatedAt: now,
+      items: [
+        {
+          id: 'mock-slide-video-1',
+          title: 'Product Demo',
+          subtitle: 'See it in action',
+          callToAction: 'Learn More',
+          callToActionUrl: '#',
+          sortOrder: 1,
+          media: {
+            id: 'mock-media-video',
+            title: 'Demo Video',
+            description: 'Big Buck Bunny sample',
+            fileUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+            fileType: 'VIDEO',
+            fileSize: null,
+            dimensions: null,
+            isFeatured: true,
+            sortOrder: 1,
+            createdAt: now,
+            updatedAt: now,
+            categoryId: null,
+            createdBy: null,
+            category: null,
+            creator: null,
+          },
+        },
+      ],
+    },
+  ]
+}
 
 const createSliderSchema = z.object({
   name: z.string().min(1, 'Slider name is required'),
@@ -56,8 +148,55 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('Fetch sliders error:', error)
+
+    // Development fallback always on
+    if (isDev()) {
+      return NextResponse.json({
+        sliders: mockSliders(),
+        mock: true,
+        hint: 'DB query failed. Ensure DATABASE_URL is set, then run: npm run db:push && npm run db:seed',
+        error: (error as Error)?.message ?? 'Unknown error'
+      })
+    }
+
+    // Optional production fallback (opt-in via env)
+    if (shouldProdFallback()) {
+      return NextResponse.json({
+        sliders: mockSliders(),
+        mock: true,
+        hint: 'Production fallback enabled. Investigate DB connectivity and disable fallback once fixed.',
+      })
+    }
+
+    // Map Prisma errors to clearer statuses/messages
+    const e = error as any
+    if (e instanceof Prisma.PrismaClientInitializationError) {
+      return NextResponse.json(
+        { code: 'DB_INIT_FAILED', message: 'Database not available' },
+        { status: 503 }
+      )
+    }
+    if (e instanceof Prisma.PrismaClientRustPanicError) {
+      return NextResponse.json(
+        { code: 'DB_PANIC', message: 'Database engine crashed' },
+        { status: 500 }
+      )
+    }
+    if (e instanceof Prisma.PrismaClientKnownRequestError) {
+      return NextResponse.json(
+        { code: e.code, message: 'Database request error', detail: e.message },
+        { status: 500 }
+      )
+    }
+    if (e instanceof Prisma.PrismaClientValidationError) {
+      return NextResponse.json(
+        { code: 'VALIDATION_ERROR', message: 'Invalid query to database' },
+        { status: 400 }
+      )
+    }
+
     return NextResponse.json(
-      { message: 'Internal server error' },
+      { code: 'INTERNAL_ERROR', message: 'Internal server error' },
       { status: 500 }
     )
   }

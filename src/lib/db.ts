@@ -47,17 +47,61 @@ function resolveSqliteUrlForServerless(defaultUrl?: string) {
   }
 }
 
-const effectiveUrl = resolveSqliteUrlForServerless(process.env.DATABASE_URL)
+function extractDatabaseUrlFromFile(filePath: string): string | null {
+  try {
+    if (!fs.existsSync(filePath)) return null
+    const content = fs.readFileSync(filePath, 'utf8')
+    // Find the last DATABASE_URL definition to respect overrides at the bottom
+    const lines = content.split(/\r?\n/)
+    for (let i = lines.length - 1; i >= 0; i--) {
+      const line = lines[i]
+      if (!line) continue
+      const match = line.match(/^\s*DATABASE_URL\s*=\s*(.*)\s*$/)
+      if (match) {
+        let val = match[1].trim()
+        // Strip surrounding quotes if present
+        if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+          val = val.slice(1, -1)
+        }
+        return val
+      }
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
+function preferPostgresDatabaseUrl(): string | undefined {
+  const envUrl = process.env.DATABASE_URL
+  const isPostgres = (u?: string | null) => !!u && /^(postgres(ql)?):\/\//i.test(u)
+  if (isPostgres(envUrl)) return envUrl
+
+  // Fallback: try reading from .env then .env.local (useful when a global env overrides local)
+  const cwd = process.cwd()
+  const candidates = [path.join(cwd, '.env'), path.join(cwd, '.env.local')]
+  for (const p of candidates) {
+    const fromFile = extractDatabaseUrlFromFile(p)
+    if (isPostgres(fromFile)) return fromFile as string
+  }
+  // As a last resort, return whatever was set (could be SQLite or undefined)
+  return envUrl
+}
+
+const baseUrl = preferPostgresDatabaseUrl()
+const effectiveUrl = resolveSqliteUrlForServerless(baseUrl)
 
 export function getEffectiveDatabaseUrl() {
-  return effectiveUrl || process.env.DATABASE_URL || null
+  return effectiveUrl || baseUrl || null
 }
 
 export const db =
   (globalForPrisma.prisma as PrismaClient | undefined) ??
   new PrismaClient({
     log: process.env.NODE_ENV === 'production' ? ['error'] : ['query'],
-    datasources: effectiveUrl ? { db: { url: effectiveUrl } } : undefined,
+    datasources: (effectiveUrl || baseUrl)
+      ? { db: { url: (effectiveUrl || baseUrl)! } }
+      : undefined,
   })
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = db

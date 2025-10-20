@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -17,8 +18,6 @@ import {
 } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Header } from '@/components/layout/Header'
-import { Footer } from '@/components/layout/Footer'
 import { ArrowLeft, Upload, Loader2, Image as ImageIcon, Video } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -27,6 +26,7 @@ export const dynamic = 'force-dynamic'
 
 export default function NewMediaPage() {
   const router = useRouter()
+  const { status } = useSession()
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -38,6 +38,12 @@ export default function NewMediaPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [dragActive, setDragActive] = useState(false)
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/sign-in')
+    }
+  }, [status, router])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -129,9 +135,7 @@ export default function NewMediaPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      
+    <div className="min-h-[50vh] bg-background">
       <main className="container py-8">
         <div className="mb-8">
           <Button variant="ghost" asChild className="mb-4">
@@ -260,14 +264,14 @@ export default function NewMediaPage() {
               <div className="space-y-2">
                 <Label>Category</Label>
                 <Select 
-                  value={formData.categoryId} 
-                  onValueChange={(value) => handleSelectChange('categoryId', value)}
+                  value={formData.categoryId || 'none'} 
+                  onValueChange={(value) => handleSelectChange('categoryId', value === 'none' ? '' : value)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No category</SelectItem>
+                    <SelectItem value="none">No category</SelectItem>
                     {/* Categories would be fetched from API */}
                     <SelectItem value="1">Nature</SelectItem>
                     <SelectItem value="2">Technology</SelectItem>
@@ -314,8 +318,6 @@ export default function NewMediaPage() {
           </form>
         </Card>
       </main>
-      
-      <Footer />
     </div>
   )
 }

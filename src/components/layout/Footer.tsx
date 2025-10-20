@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import { useSession } from 'next-auth/react'
 import { 
   Facebook, 
   Twitter, 
@@ -114,6 +115,7 @@ export function Footer({
   companyName = 'Company'
 }: FooterProps) {
   const [email, setEmail] = useState('')
+  const { status } = useSession()
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault()
@@ -151,34 +153,36 @@ export function Footer({
               </div>
             </div>
 
-            {/* Social Media Links */}
-            <div className="flex space-x-2">
-              {socialLinks
-                .filter(link => link.isActive)
-                .map((socialLink) => {
-                  const IconComponent = iconMap[socialLink.iconName]
-                  if (!IconComponent) return null
-                  
-                  return (
-                    <Button
-                      key={socialLink.id}
-                      variant="ghost"
-                      size="sm"
-                      asChild
-                      className="h-8 w-8 p-0"
-                    >
-                      <Link
-                        href={socialLink.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={socialLink.platform}
+            {/* Social Media Links (hidden when not explicitly unauthenticated) */}
+            {status === 'unauthenticated' && (
+              <div className="flex space-x-2">
+                {socialLinks
+                  .filter(link => link.isActive)
+                  .map((socialLink) => {
+                    const IconComponent = iconMap[socialLink.iconName]
+                    if (!IconComponent) return null
+                    
+                    return (
+                      <Button
+                        key={socialLink.id}
+                        variant="ghost"
+                        size="sm"
+                        asChild
+                        className="h-8 w-8 p-0"
                       >
-                        <IconComponent className="h-4 w-4" />
-                      </Link>
-                    </Button>
-                  )
-                })}
-            </div>
+                        <Link
+                          href={socialLink.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={socialLink.platform}
+                        >
+                          <IconComponent className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                    )
+                  })}
+              </div>
+            )}
           </div>
 
           {/* Footer Links */}

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -14,8 +15,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Header } from '@/components/layout/Header'
-import { Footer } from '@/components/layout/Footer'
 import { ImageWithFallback } from '@/components/ui/ImageWithFallback'
 import { 
   Plus, 
@@ -50,6 +49,7 @@ interface MediaItem {
 
 export default function AdminMediaPage() {
   const router = useRouter()
+  const { status } = useSession()
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([])
   const [categories, setCategories] = useState([])
   const [isLoading, setIsLoading] = useState(true)
@@ -58,17 +58,16 @@ export default function AdminMediaPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
   useEffect(() => {
-    // Check authentication
-    const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken')
-    if (!token) {
+    if (status === 'unauthenticated') {
       router.push('/sign-in')
       return
     }
-
-    // Fetch media items and categories
-    fetchMediaItems()
-    fetchCategories()
-  }, [router])
+    if (status === 'authenticated') {
+      // Fetch media items and categories
+      fetchMediaItems()
+      fetchCategories()
+    }
+  }, [router, status])
 
   const fetchMediaItems = async () => {
     try {
@@ -124,24 +123,20 @@ export default function AdminMediaPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <main className="container py-8">
+      <div className="min-h-[50vh] bg-background">
+        <div className="container py-8">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
             <p>Loading media items...</p>
           </div>
-        </main>
-        <Footer />
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      
-      <main className="container py-8">
+    <div className="min-h-[50vh] bg-background">
+      <div className="container py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold mb-2">Media Management</h1>
@@ -318,9 +313,7 @@ export default function AdminMediaPage() {
             ))}
           </div>
         )}
-      </main>
-      
-      <Footer />
+      </div>
     </div>
   )
 }

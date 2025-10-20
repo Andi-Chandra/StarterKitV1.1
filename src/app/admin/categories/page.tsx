@@ -2,12 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Header } from '@/components/layout/Header'
-import { Footer } from '@/components/layout/Footer'
 import { 
   Plus, 
   Edit, 
@@ -26,20 +25,20 @@ interface Category {
 
 export default function AdminCategoriesPage() {
   const router = useRouter()
+  const { status } = useSession()
   const [categories, setCategories] = useState<Category[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
-    // Check authentication
-    const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken')
-    if (!token) {
+    if (status === 'unauthenticated') {
       router.push('/sign-in')
       return
     }
-
-    fetchCategories()
-  }, [router])
+    if (status === 'authenticated') {
+      fetchCategories()
+    }
+  }, [router, status])
 
   const fetchCategories = async () => {
     try {
@@ -82,24 +81,20 @@ export default function AdminCategoriesPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <main className="container py-8">
+      <div className="min-h-[50vh] bg-background">
+        <div className="container py-8">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
             <p>Loading categories...</p>
           </div>
-        </main>
-        <Footer />
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      
-      <main className="container py-8">
+    <div className="min-h-[50vh] bg-background">
+      <div className="container py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold mb-2">Category Management</h1>
@@ -192,9 +187,7 @@ export default function AdminCategoriesPage() {
             ))}
           </div>
         )}
-      </main>
-      
-      <Footer />
+      </div>
     </div>
   )
 }

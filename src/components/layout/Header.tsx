@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import { useSession } from 'next-auth/react'
 import { Menu, X, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -34,6 +35,7 @@ export function Header({
   companyName = 'Company' 
 }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const { status } = useSession()
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen)
@@ -106,16 +108,20 @@ export function Header({
 
         {/* Auth Buttons */}
         <div className="flex items-center space-x-2">
-          <Button size="sm" asChild>
-            <Link href="/sign-in">Sign In</Link>
-          </Button>
+          {status === 'unauthenticated' && (
+            <Button size="sm" asChild>
+              <Link href="/sign-in">Sign In</Link>
+            </Button>
+          )}
 
           {/* Mobile Menu Button */}
           <Button
             variant="ghost"
             size="sm"
-            className="md:hidden"
+            className="relative z-50 md:hidden"
             onClick={toggleMobileMenu}
+            aria-expanded={isMobileMenuOpen}
+            aria-label="Toggle navigation menu"
           >
             {isMobileMenuOpen ? (
               <X className="h-5 w-5" />
@@ -127,10 +133,13 @@ export function Header({
       </div>
 
       {/* Mobile Menu */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden">
-          <div className="container px-4 py-4 space-y-2">
-            {navigationLinks.map((link) => (
+      <div 
+        className={`md:hidden fixed inset-x-0 top-16 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b transform transition-all duration-300 ease-in-out ${
+          isMobileMenuOpen ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
+        }`}
+      >
+        <div className="container px-4 py-4 space-y-2 max-h-[calc(100vh-4rem)] overflow-y-auto">
+          {navigationLinks.map((link) => (
               <div key={link.id}>
                 {link.children && link.children.length > 0 ? (
                   <div className="space-y-2">
@@ -168,7 +177,6 @@ export function Header({
             ))}
           </div>
         </div>
-      )}
     </header>
   )
 }

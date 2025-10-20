@@ -3,6 +3,8 @@ export const runtime = 'nodejs'
 import { z } from 'zod'
 import { db } from '@/lib/db'
 import { Prisma } from '@prisma/client'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
 function isDev() {
   return process.env.NODE_ENV !== 'production'
@@ -241,6 +243,10 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions)
+    if (!session) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
+    }
     const body = await request.json()
     const { title, description, fileUrl, fileType, categoryId, isFeatured } = createMediaSchema.parse(body)
 

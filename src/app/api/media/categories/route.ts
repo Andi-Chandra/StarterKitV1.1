@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 export const runtime = 'nodejs'
 import { z } from 'zod'
 import { db } from '@/lib/db'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
 const createCategorySchema = z.object({
   name: z.string().min(1, 'Category name is required'),
@@ -32,6 +34,10 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions)
+    if (!session) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
+    }
     const body = await request.json()
     const { name, slug, description } = createCategorySchema.parse(body)
 

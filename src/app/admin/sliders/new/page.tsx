@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -17,19 +18,27 @@ import {
 } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Header } from '@/components/layout/Header'
-import { Footer } from '@/components/layout/Footer'
-import { ArrowLeft, Loader2, Plus, Trash2 } from 'lucide-react'
+import { ArrowLeft, Loader2, Plus, Trash2, Image as ImageIcon, Video } from 'lucide-react'
+import { ImageWithFallback } from '@/components/ui/ImageWithFallback'
 
 interface SliderItem {
   title: string
   subtitle?: string
   callToAction?: string
   callToActionUrl?: string
+  mediaId?: string
+}
+
+interface MediaOption {
+  id: string
+  title: string
+  fileUrl: string
+  fileType: 'IMAGE' | 'VIDEO'
 }
 
 export default function NewSliderPage() {
   const router = useRouter()
+  const { status } = useSession()
   const [formData, setFormData] = useState({
     name: '',
     type: 'IMAGE' as 'IMAGE' | 'VIDEO',
@@ -39,10 +48,45 @@ export default function NewSliderPage() {
     loop: true
   })
   const [sliderItems, setSliderItems] = useState<SliderItem[]>([
-    { title: '', subtitle: '', callToAction: '', callToActionUrl: '' }
+    { title: '', subtitle: '', callToAction: '', callToActionUrl: '', mediaId: '' }
   ])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [mediaOptions, setMediaOptions] = useState<MediaOption[]>([])
+  const [isLoadingMedia, setIsLoadingMedia] = useState(false)
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/sign-in')
+    }
+  }, [status, router])
+
+  // Fetch media options based on slider type
+  useEffect(() => {
+    async function fetchMedia() {
+      try {
+        setIsLoadingMedia(true)
+        const type = formData.type
+        const res = await fetch(`/api/media?limit=100&type=${type}`)
+        if (!res.ok) {
+          setMediaOptions([])
+          return
+        }
+        const data = await res.json()
+        const items: MediaOption[] = (data.mediaItems || [])
+          .filter((m: any) => m.fileType === type)
+          .map((m: any) => ({ id: m.id, title: m.title, fileUrl: m.fileUrl, fileType: m.fileType }))
+        setMediaOptions(items)
+        // If slider type changed, clear any previously selected media if mismatched
+        setSliderItems(prev => prev.map(it => ({ ...it, mediaId: items.find(i => i.id === it.mediaId) ? it.mediaId : '' })))
+      } catch (err) {
+        setMediaOptions([])
+      } finally {
+        setIsLoadingMedia(false)
+      }
+    }
+    fetchMedia()
+  }, [formData.type])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type } = e.target
@@ -90,6 +134,10 @@ export default function NewSliderPage() {
         setError('All slider items must have a title')
         return
       }
+      if (sliderItems.some(item => !item.mediaId)) {
+        setError('Each slider item must have a media selected')
+        return
+      }
 
       const response = await fetch('/api/sliders', {
         method: 'POST',
@@ -98,7 +146,14 @@ export default function NewSliderPage() {
         },
         body: JSON.stringify({
           ...formData,
-          items: sliderItems.map((item, index) => ({ ...item, sortOrder: index }))
+          items: sliderItems.map((item, index) => ({
+            title: item.title,
+            subtitle: item.subtitle,
+            callToAction: item.callToAction,
+            callToActionUrl: item.callToActionUrl,
+            mediaId: item.mediaId!,
+            sortOrder: index,
+          }))
         })
       })
 
@@ -117,9 +172,7 @@ export default function NewSliderPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      
+    <div className="min-h-[50vh] bg-background">
       <main className="container py-8">
         <div className="mb-8">
           <Button variant="ghost" asChild className="mb-4">
@@ -289,6 +342,57 @@ export default function NewSliderPage() {
                         </div>
                       </div>
 
+                      {/* Media selection + preview */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Media *</Label>
+                          <Select
+                            value={item.mediaId || ''}
+                            onValueChange={(value) => handleSliderItemChange(index, 'mediaId', value)}
+                            disabled={isLoading || isLoadingMedia}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder={isLoadingMedia ? 'Loading media…' : 'Select media'} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {mediaOptions.length === 0 ? (
+                                <div className="px-3 py-2 text-sm text-muted-foreground">No media available</div>
+                              ) : (
+                                mediaOptions.map((m) => (
+                                  <SelectItem key={m.id} value={m.id}>
+                                    {m.title || (m.fileType === 'IMAGE' ? 'Image' : 'Video')}
+                                  </SelectItem>
+                                ))
+                              )}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Preview</Label>
+                          <div className="border rounded-md p-2 h-40 flex items-center justify-center bg-muted/30">
+                            {(() => {
+                              const sel = mediaOptions.find(o => o.id === item.mediaId)
+                              if (!sel) {
+                                return <span className="text-sm text-muted-foreground">No media selected</span>
+                              }
+                              if (sel.fileType === 'IMAGE') {
+                                return (
+                                  <div className="relative w-full h-36">
+                                    <ImageWithFallback src={sel.fileUrl} alt={sel.title} fill className="object-contain" />
+                                  </div>
+                                )
+                              }
+                              return (
+                                <div className="flex items-center gap-2 text-muted-foreground">
+                                  <Video className="h-5 w-5" />
+                                  <span className="text-sm truncate max-w-[16rem]">{sel.title || sel.fileUrl}</span>
+                                </div>
+                              )
+                            })()}
+                          </div>
+                        </div>
+                      </div>
+
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label>Call to Action</Label>
@@ -342,8 +446,6 @@ export default function NewSliderPage() {
           </form>
         </Card>
       </main>
-      
-      <Footer />
     </div>
   )
 }

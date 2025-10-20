@@ -9,8 +9,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Header } from '@/components/layout/Header'
-import { Footer } from '@/components/layout/Footer'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 
 export default function NewCategoryPage() {
@@ -72,9 +70,7 @@ export default function NewCategoryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      
+    <div className="min-h-[50vh] bg-background">
       <main className="container py-8">
         <div className="mb-8">
           <Button variant="ghost" asChild className="mb-4">
@@ -175,8 +171,6 @@ export default function NewCategoryPage() {
           </form>
         </Card>
       </main>
-      
-      <Footer />
     </div>
   )
 }

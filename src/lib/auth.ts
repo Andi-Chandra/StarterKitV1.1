@@ -70,6 +70,24 @@ export const authOptions = {
       }
       return session
     },
+    async redirect({ url, baseUrl }: { url: string; baseUrl: string }) {
+      try {
+        // Normalize URL for comparison
+        const to = url.startsWith('/') ? new URL(url, baseUrl) : new URL(url)
+        const path = to.pathname
+        if (path === '/dashboard') {
+          return '/admin'
+        }
+        // Allow same-origin redirects
+        if (to.origin === new URL(baseUrl).origin) {
+          return to.pathname + to.search + to.hash
+        }
+        // Fallback to base URL
+        return baseUrl
+      } catch {
+        return '/admin'
+      }
+    },
   },
   secret: process.env.NEXTAUTH_SECRET,
 }

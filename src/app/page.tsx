@@ -7,6 +7,7 @@ import { ImageSlider } from '@/components/media/ImageSlider'
 import { VideoSlider } from '@/components/media/VideoSlider'
 import { Gallery } from '@/components/media/Gallery'
 import { Button } from '@/components/ui/button'
+import { useSession } from 'next-auth/react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Play, ArrowRight, Star, Users, Zap } from 'lucide-react'
@@ -85,6 +86,7 @@ function ErrorState({ error, code }: { error: string; code?: string }) {
 
 export default function Home() {
   const { mediaItems, categories, sliders, navigationLinks, loading, error, errorCode } = useMedia()
+  const { status } = useSession()
 
   if (loading) {
     return <LoadingSkeleton />
@@ -105,6 +107,13 @@ export default function Home() {
 
       {/* Main Content */}
       <main>
+        {status === 'unauthenticated' && (
+          <div className="container py-4 flex justify-end">
+            <Button asChild size="sm">
+              <Link href="/sign-in">Sign In</Link>
+            </Button>
+          </div>
+        )}
         {/* Hero Image Slider */}
         <section>
           <ImageSlider 
@@ -224,29 +233,7 @@ export default function Home() {
           </section>
         )}
 
-        {/* CTA Section */}
-        <section className="py-20 bg-primary text-primary-foreground">
-          <div className="container text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Ready to Get Started?
-            </h2>
-            <p className="text-xl mb-8 max-w-2xl mx-auto opacity-90">
-              Join thousands of satisfied users who are already using our platform.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" variant="secondary" className="gap-2" asChild>
-                <Link href="/sign-in">
-                  Sign In to Get Started
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </Button>
-              <Button size="lg" variant="outline" className="gap-2">
-                <Play className="h-4 w-4" />
-                Watch Demo
-              </Button>
-            </div>
-          </div>
-        </section>
+        
       </main>
 
       {/* Footer */}

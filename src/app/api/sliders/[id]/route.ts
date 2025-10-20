@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 export const runtime = 'nodejs'
 import { z } from 'zod'
 import { db } from '@/lib/db'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
 const updateSliderSchema = z.object({
   name: z.string().optional(),
@@ -17,6 +19,10 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
+    const session = await getServerSession(authOptions)
+    if (!session) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
+    }
     const sliderId = params.id
     const body = await request.json()
     const updateData = updateSliderSchema.parse(body)
@@ -76,6 +82,10 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    const session = await getServerSession(authOptions)
+    if (!session) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
+    }
     const sliderId = params.id
 
     // Check if slider exists
@@ -110,5 +120,30 @@ export async function DELETE(
       { message: 'Internal server error' },
       { status: 500 }
     )
+  }
+}
+
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const sliderId = params.id
+    const slider = await db.slider.findUnique({
+      where: { id: sliderId },
+      include: {
+        items: {
+          include: { media: true },
+          orderBy: { sortOrder: 'asc' },
+        },
+      },
+    })
+    if (!slider) {
+      return NextResponse.json({ message: 'Slider not found' }, { status: 404 })
+    }
+    return NextResponse.json({ slider })
+  } catch (error) {
+    console.error('Get slider error:', error)
+    return NextResponse.json({ message: 'Internal server error' }, { status: 500 })
   }
 }

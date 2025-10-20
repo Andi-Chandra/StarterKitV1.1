@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 export const runtime = 'nodejs'
 import { z } from 'zod'
 import { db } from '@/lib/db'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import { Prisma } from '@prisma/client'
 
 function isDev() {
@@ -107,6 +109,7 @@ const createSliderSchema = z.object({
     subtitle: z.string().optional(),
     callToAction: z.string().optional(),
     callToActionUrl: z.string().optional(),
+    mediaId: z.string().min(1, 'Media is required'),
     sortOrder: z.number()
   })).optional()
 })
@@ -204,6 +207,10 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions)
+    if (!session) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
+    }
     const body = await request.json()
     const { name, type, isActive, autoPlay, autoPlayInterval, loop, items } = createSliderSchema.parse(body)
 

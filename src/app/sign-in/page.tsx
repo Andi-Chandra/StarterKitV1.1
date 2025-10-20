@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { signIn } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -16,6 +17,8 @@ import { Footer } from '@/components/layout/Footer'
 
 export default function SignInPage() {
   const router = useRouter()
+  const { status } = useSession()
+  const searchParams = useSearchParams()
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -24,6 +27,20 @@ export default function SignInPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+
+  // Clean any callbackUrl query if present (ensure plain /sign-in)
+  useEffect(() => {
+    if (searchParams && searchParams.has('callbackUrl')) {
+      router.replace('/sign-in')
+    }
+  }, [searchParams, router])
+
+  // If already signed in, send to admin
+  useEffect(() => {
+    if (status === 'authenticated') {
+      router.replace('/admin')
+    }
+  }, [status, router])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target
@@ -57,7 +74,7 @@ export default function SignInPage() {
         email: formData.email,
         password: formData.password,
         redirect: false,
-        callbackUrl: '/dashboard',
+        callbackUrl: '/admin',
       })
 
       if (result?.error) {
@@ -70,7 +87,7 @@ export default function SignInPage() {
         router.push(result.url)
         return
       }
-      router.push('/dashboard')
+      router.push('/admin')
     } catch (err) {
       setError('Something went wrong. Please try again.')
     } finally {

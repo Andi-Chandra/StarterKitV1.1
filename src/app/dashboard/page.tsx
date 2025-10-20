@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSession, signOut } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -9,47 +10,32 @@ import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { User, Mail, Calendar, LogOut, Settings } from 'lucide-react'
 
-interface User {
-  id: string
-  name: string
-  email: string
-  createdAt: string
-}
-
 export default function DashboardPage() {
   const router = useRouter()
-  const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const { status, data } = useSession()
+
+  const user = useMemo(() => {
+    const u = data?.user as any
+    if (!u) return null
+    return {
+      id: u.id || 'unknown',
+      name: u.name || (u.email ? u.email.split('@')[0] : 'User'),
+      email: u.email || 'unknown@example.com',
+      createdAt: new Date().toISOString(),
+    }
+  }, [data])
 
   useEffect(() => {
-    // Check if user is authenticated
-    const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken')
-    
-    if (!token) {
+    if (status === 'unauthenticated') {
       router.push('/sign-in')
-      return
     }
-
-    // For demo purposes, simulate user data
-    // In a real app, you would validate the token and fetch user data
-    setTimeout(() => {
-      setUser({
-        id: '1',
-        name: 'Demo User',
-        email: 'demo@example.com',
-        createdAt: new Date().toISOString()
-      })
-      setIsLoading(false)
-    }, 1000)
-  }, [router])
+  }, [status, router])
 
   const handleLogout = () => {
-    localStorage.removeItem('authToken')
-    sessionStorage.removeItem('authToken')
-    router.push('/')
+    signOut({ callbackUrl: '/' })
   }
 
-  if (isLoading) {
+  if (status === 'loading') {
     return (
       <div className="min-h-screen bg-background">
         <Header />

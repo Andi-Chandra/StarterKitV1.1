@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { signIn } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -51,35 +52,27 @@ export default function SignInPage() {
         return
       }
 
-      // Simulate API call (replace with actual authentication)
-      const response = await fetch('/api/auth/signin', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password
-        })
+      // Use NextAuth credentials provider
+      const result = await signIn('credentials', {
+        email: formData.email,
+        password: formData.password,
+        redirect: false,
+        callbackUrl: '/dashboard',
       })
 
-      if (response.ok) {
-        const data = await response.json()
-        // Store auth token or session
-        if (formData.rememberMe) {
-          localStorage.setItem('authToken', data.token)
-        } else {
-          sessionStorage.setItem('authToken', data.token)
-        }
-        router.push('/dashboard')
-      } else {
-        const errorData = await response.json()
-        setError(errorData.message || 'Invalid email or password')
+      if (result?.error) {
+        setError(result.error || 'Invalid email or password')
+        return
       }
-    } catch (err) {
-      // For demo purposes, simulate successful login
-      console.log('Demo mode: simulating successful login')
+
+      // Successful sign-in
+      if (result?.url) {
+        router.push(result.url)
+        return
+      }
       router.push('/dashboard')
+    } catch (err) {
+      setError('Something went wrong. Please try again.')
     } finally {
       setIsLoading(false)
     }

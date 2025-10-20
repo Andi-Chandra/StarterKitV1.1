@@ -32,7 +32,7 @@ interface HeaderProps {
 export function Header({ 
   navigationLinks = [], 
   companyLogo = '/logo.svg',
-  companyName = 'Company' 
+  companyName = 'PPS Belawan' 
 }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const { status } = useSession()

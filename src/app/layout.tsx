@@ -15,22 +15,21 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  // title: "Z.ai Code Scaffold - AI-Powered Development"
   title: "PPS Belawan",
-  description: "Modern Next.js scaffold optimized for AI-powered development with Z.ai. Built with TypeScript, Tailwind CSS, and shadcn/ui.",
-  keywords: ["Z.ai", "Next.js", "TypeScript", "Tailwind CSS", "shadcn/ui", "AI development", "React"],
-  authors: [{ name: "Andi Candra" }],
+  description: "Pangkalan Pendaratan Ikan PPS Belawan.",
+  keywords: ["PPS Belawan", "Perikanan", "Belawan", "Sumatera Utara"],
+  authors: [{ name: "PPS Belawan" }],
   openGraph: {
-    title: "Z.ai Code Scaffold",
-    description: "AI-powered development with modern React stack",
+    title: "PPS Belawan",
+    description: "Pangkalan Pendaratan Ikan PPS Belawan",
     url: "informasippsbelawan.vercel.app",
-    siteName: "Z.ai",
+    siteName: "PPS Belawan",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Z.ai Code Scaffold",
-    description: "AI-powered development with modern React stack",
+    title: "PPS Belawan",
+    description: "Pangkalan Pendaratan Ikan PPS Belawan",
   },
 };
 

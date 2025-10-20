@@ -61,11 +61,11 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 
 export function Footer({
   companyInfo = {
-    name: 'Company',
-    description: 'Modern web application showcasing the best in design and functionality.',
-    email: 'info@company.com',
-    phone: '+1 (555) 123-4567',
-    address: '123 Business St, City, State 12345'
+    name: 'PPS Belawan',
+    description: 'Pangkalan Pendaratan Ikan Belawan',
+    email: 'info@example.com',
+    phone: '+62',
+    address: 'Belawan, Sumatera Utara'
   },
   footerLinks = [
     {
@@ -112,7 +112,7 @@ export function Footer({
     { id: '4', platform: 'linkedin', url: '#', iconName: 'linkedin', isActive: true },
     { id: '5', platform: 'github', url: '#', iconName: 'github', isActive: true },
   ],
-  companyName = 'Company'
+  companyName = 'PPS Belawan'
 }: FooterProps) {
   const [email, setEmail] = useState('')
   const { status } = useSession()

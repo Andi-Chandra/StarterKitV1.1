@@ -29,7 +29,22 @@ export function ImageWithFallback({
   fallbackSrc = '/logo.svg',
   forceUnoptimized = false
 }: ImageWithFallbackProps) {
-  const [imgSrc, setImgSrc] = useState(src)
+  function normalizeSupabasePublicUrl(u: string) {
+    try {
+      // If it's a Supabase Storage URL missing "/public", insert it
+      // e.g. https://xyz.supabase.co/storage/v1/object/media/path -> .../object/public/media/path
+      const re = /^(https?:\/\/[^/]+\.supabase\.co\/storage\/v1\/object\/)(?!public\/)([^/]+\/.*)$/
+      const m = u.match(re)
+      if (m) {
+        return `${m[1]}public/${m[2]}`
+      }
+      return u
+    } catch {
+      return u
+    }
+  }
+
+  const [imgSrc, setImgSrc] = useState(normalizeSupabasePublicUrl(src))
   const [hasError, setHasError] = useState(false)
 
   const handleError = () => {

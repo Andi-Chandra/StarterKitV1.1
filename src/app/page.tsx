@@ -107,13 +107,6 @@ export default function Home() {
 
       {/* Main Content */}
       <main>
-        {status === 'unauthenticated' && (
-          <div className="container py-4 flex justify-end">
-            <Button asChild size="sm">
-              <Link href="/sign-in">Sign In</Link>
-            </Button>
-          </div>
-        )}
         {/* Hero Image Slider */}
         <section>
           <ImageSlider 

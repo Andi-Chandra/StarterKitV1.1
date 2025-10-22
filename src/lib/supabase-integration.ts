@@ -1,4 +1,4 @@
-import { supabase, supabaseAdmin } from './supabase'
+import { supabase, getSupabaseAdmin } from './supabase'
 import { db } from './db'
 
 // Integration utilities for combining local SQLite with Supabase features
@@ -84,7 +84,8 @@ export class SupabaseIntegration {
 
     try {
       // Fetch data from Supabase
-      const { data: mediaItems, error: mediaError } = await supabaseAdmin
+      const admin = getSupabaseAdmin()
+      const { data: mediaItems, error: mediaError } = await admin
         .from('media_items')
         .select('*')
       
@@ -136,7 +137,8 @@ export class SupabaseIntegration {
 
       // Sync to Supabase
       for (const item of mediaItems) {
-        const { error } = await supabaseAdmin
+        const admin = getSupabaseAdmin()
+        const { error } = await admin
           .from('media_items')
           .upsert({
             id: item.id,

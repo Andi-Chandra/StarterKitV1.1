@@ -1,4 +1,5 @@
-import { supabaseAdmin } from '../src/lib/supabase'
+import { getSupabaseAdmin } from '../src/lib/supabase'
+const supabaseAdmin = getSupabaseAdmin()
 
 async function createTablesInSupabase() {
   console.log('🚀 Starting Supabase migration...')

@@ -1,4 +1,5 @@
-import { supabaseAdmin } from './supabase'
+import { getSupabaseAdmin } from './supabase'
+const supabaseAdmin = getSupabaseAdmin()
 
 // Hybrid database operations using Supabase client
 // This replaces Prisma operations with Supabase operations

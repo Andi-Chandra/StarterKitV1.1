@@ -259,7 +259,6 @@ export async function POST(request: NextRequest) {
         fileType,
         categoryId: categoryId || null,
         isFeatured,
-        createdBy: 'demo-user' // In a real app, get from authenticated user
       },
       include: {
         category: true,
@@ -280,11 +279,33 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Create media error:', error)
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { message: 'Invalid input', errors: error.errors },
         { status: 400 }
+      )
+    }
+
+    // Map common Prisma errors to clearer responses
+    const e = error as any
+    if (e instanceof Prisma.PrismaClientInitializationError) {
+      return NextResponse.json(
+        { code: 'DB_INIT_FAILED', message: 'Database not available' },
+        { status: 503 }
+      )
+    }
+    if (e instanceof Prisma.PrismaClientKnownRequestError) {
+      // P2003: Foreign key constraint failed
+      if (e.code === 'P2003') {
+        return NextResponse.json(
+          { code: 'FK_CONSTRAINT', message: 'Related record not found (check categoryId/createdBy)' },
+          { status: 409 }
+        )
+      }
+      return NextResponse.json(
+        { code: e.code, message: 'Database request error', detail: e.message },
+        { status: 500 }
       )
     }
 

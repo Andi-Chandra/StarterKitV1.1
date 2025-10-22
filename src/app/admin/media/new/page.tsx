@@ -20,6 +20,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { ArrowLeft, Upload, Loader2, Image as ImageIcon, Video } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { uploadToSupabaseStorage } from '@/lib/upload'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
@@ -38,6 +39,7 @@ export default function NewMediaPage() {
     isFeatured: false
   })
   const [isLoading, setIsLoading] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState('')
   const [dragActive, setDragActive] = useState(false)
 
@@ -106,20 +108,22 @@ export default function NewMediaPage() {
     }
   }
 
-  const handleFile = (file: File) => {
-    // In a real application, you would upload the file to a storage service
-    // For demo purposes, we'll use a placeholder URL
-    const isVideo = file.type.startsWith('video/')
-    const placeholderUrl = isVideo 
-      ? 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
-      : `https://picsum.photos/800/600?random=${Date.now()}`
-    
-    setFormData(prev => ({
-      ...prev,
-      fileUrl: placeholderUrl,
-      fileType: isVideo ? 'VIDEO' : 'IMAGE',
-      title: prev.title || file.name.split('.')[0]
-    }))
+  const handleFile = async (file: File) => {
+    setError('')
+    setIsUploading(true)
+    try {
+      const { url, kind } = await uploadToSupabaseStorage(file)
+      setFormData(prev => ({
+        ...prev,
+        fileUrl: url,
+        fileType: kind === 'video' ? 'VIDEO' : 'IMAGE',
+        title: prev.title || file.name.split('.')[0]
+      }))
+    } catch (e: any) {
+      setError(e?.message || 'Upload failed. Ensure Supabase Storage bucket "media" exists and is public.')
+    } finally {
+      setIsUploading(false)
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -216,7 +220,7 @@ export default function NewMediaPage() {
                           <Video className="h-12 w-12 text-primary mx-auto" />
                         )}
                         <p className="text-sm font-medium">
-                          {formData.fileType === 'IMAGE' ? 'Image selected' : 'Video selected'}
+                          {isUploading ? 'Uploading…' : formData.fileType === 'IMAGE' ? 'Image selected' : 'Video selected'}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           Click to change file
@@ -319,16 +323,19 @@ export default function NewMediaPage() {
               <div className="flex items-center gap-4 pt-4">
                 <Button 
                   type="submit" 
-                  disabled={isLoading}
+                  disabled={isLoading || isUploading}
                 >
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Creating...
                     </>
-                  ) : (
-                    'Create Media'
-                  )}
+                  ) : isUploading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Uploading...
+                    </>
+                  ) : 'Create Media'}
                 </Button>
                 <Button 
                   type="button" 

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 export const runtime = 'nodejs'
 import { z } from 'zod'
 import { db } from '@/lib/db'
+import { randomUUID } from 'crypto'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 
@@ -56,6 +57,7 @@ export async function POST(request: NextRequest) {
     // Create category
     const category = await db.mediaCategory.create({
       data: {
+        id: randomUUID(),
         name,
         slug,
         description

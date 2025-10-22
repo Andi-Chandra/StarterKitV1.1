@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 export const runtime = 'nodejs'
 import { z } from 'zod'
 import { db } from '@/lib/db'
+import { randomUUID } from 'crypto'
 import { Prisma } from '@prisma/client'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
@@ -253,6 +254,7 @@ export async function POST(request: NextRequest) {
     // Create media item
     const mediaItem = await db.mediaItem.create({
       data: {
+        id: randomUUID(),
         title,
         description,
         fileUrl,
@@ -306,6 +308,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { code: e.code, message: 'Database request error', detail: e.message },
         { status: 500 }
+      )
+    }
+    if (e instanceof Prisma.PrismaClientValidationError) {
+      return NextResponse.json(
+        { code: 'VALIDATION_ERROR', message: 'Invalid data or missing required fields' },
+        { status: 400 }
       )
     }
 

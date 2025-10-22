@@ -27,6 +27,8 @@ export const dynamic = 'force-dynamic'
 export default function NewMediaPage() {
   const router = useRouter()
   const { status } = useSession()
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([])
+  const [categoriesLoading, setCategoriesLoading] = useState(true)
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -44,6 +46,26 @@ export default function NewMediaPage() {
       router.push('/sign-in')
     }
   }, [status, router])
+
+  // Load categories from API
+  useEffect(() => {
+    let ignore = false
+    async function loadCategories() {
+      try {
+        const res = await fetch('/api/media/categories')
+        if (!res.ok) throw new Error('failed')
+        const json = await res.json()
+        if (!ignore && Array.isArray(json.categories)) {
+          setCategories(json.categories.map((c: any) => ({ id: c.id, name: c.name })))
+        }
+      } catch {}
+      finally {
+        if (!ignore) setCategoriesLoading(false)
+      }
+    }
+    loadCategories()
+    return () => { ignore = true }
+  }, [])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -272,12 +294,14 @@ export default function NewMediaPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">No category</SelectItem>
-                    {/* Categories would be fetched from API */}
-                    <SelectItem value="1">Nature</SelectItem>
-                    <SelectItem value="2">Technology</SelectItem>
-                    <SelectItem value="3">Business</SelectItem>
+                    {categories.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
+                {categoriesLoading && (
+                  <p className="text-xs text-muted-foreground">Loading categories…</p>
+                )}
               </div>
 
               {/* Featured */}

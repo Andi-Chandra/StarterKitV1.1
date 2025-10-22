@@ -29,28 +29,22 @@ export async function uploadToSupabaseStorage(file: File): Promise<{ url: string
 
   const kind: UploadKind = file.type.startsWith('video/') ? 'video' : 'image'
   const ext = getExtFromFilename(file.name, kind === 'video' ? 'mp4' : 'jpg')
-  const id = makeId()
-  const path = `${kind}s/${id}.${ext}`
 
-  let { error } = await supabase.storage.from('media').upload(path, file, {
-    upsert: true,
-    contentType: file.type || (kind === 'video' ? 'video/mp4' : 'image/jpeg'),
-    cacheControl: '3600',
+  // Request a signed upload token from the server (avoids Storage RLS violations)
+  const signed = await fetch('/api/storage/signed-upload', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ kind, ext, contentType: file.type || (kind === 'video' ? 'video/mp4' : 'image/jpeg') }),
   })
+  if (!signed.ok) {
+    const text = await signed.text().catch(() => '')
+    throw new Error(`Failed to prepare upload: ${text || signed.statusText}`)
+  }
+  const { path, token } = await signed.json()
+
+  const { error } = await supabase.storage.from('media').uploadToSignedUrl(path, token, file)
   if (error) {
-    // Retry once if bucket was just created or not found
-    if (/bucket.*not.*found/i.test(error.message)) {
-      try { await fetch('/api/storage/ensure-bucket', { method: 'POST' }) } catch {}
-      const retry = await supabase.storage.from('media').upload(path, file, {
-        upsert: true,
-        contentType: file.type || (kind === 'video' ? 'video/mp4' : 'image/jpeg'),
-        cacheControl: '3600',
-      })
-      error = retry.error
-    }
-    if (error) {
-      throw new Error(`Upload failed: ${error.message}`)
-    }
+    throw new Error(`Upload failed: ${error.message}`)
   }
 
   const publicUrl = supabase.storage.from('media').getPublicUrl(path).data.publicUrl

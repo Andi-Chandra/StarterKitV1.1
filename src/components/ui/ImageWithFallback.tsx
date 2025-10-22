@@ -14,6 +14,7 @@ interface ImageWithFallbackProps {
   priority?: boolean
   quality?: number
   fallbackSrc?: string
+  forceUnoptimized?: boolean
 }
 
 export function ImageWithFallback({
@@ -25,7 +26,8 @@ export function ImageWithFallback({
   className,
   priority = false,
   quality = 75,
-  fallbackSrc = '/logo.svg'
+  fallbackSrc = '/logo.svg',
+  forceUnoptimized = false
 }: ImageWithFallbackProps) {
   const [imgSrc, setImgSrc] = useState(src)
   const [hasError, setHasError] = useState(false)
@@ -36,6 +38,10 @@ export function ImageWithFallback({
       setHasError(true)
     }
   }
+
+  // If the image is an absolute remote URL, bypass the Next.js optimizer to avoid
+  // _next/image 404s when remote hosts are unreachable or not whitelisted at build time.
+  const isRemoteAbsolute = /^https?:\/\//.test(imgSrc)
 
   return (
     <Image
@@ -48,7 +54,7 @@ export function ImageWithFallback({
       priority={priority}
       quality={quality}
       onError={handleError}
-      unoptimized={hasError}
+      unoptimized={forceUnoptimized || isRemoteAbsolute || hasError}
     />
   )
 }

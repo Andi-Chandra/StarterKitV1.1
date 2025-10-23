@@ -47,6 +47,13 @@ export async function uploadToSupabaseStorage(file: File): Promise<{ url: string
     throw new Error(`Upload failed: ${error.message}`)
   }
 
-  const publicUrl = supabase.storage.from('media').getPublicUrl(path).data.publicUrl
+  // Generate a transformed public URL so images display in a consistent size (16:9 cover)
+  // For videos, transform is ignored by the CDN and the original URL is returned.
+  const { data: pub } = supabase.storage
+    .from('media')
+    .getPublicUrl(path, {
+      transform: { width: 1920, height: 1080, resize: 'cover' },
+    } as any)
+  const publicUrl = pub?.publicUrl || supabase.storage.from('media').getPublicUrl(path).data.publicUrl
   return { url: publicUrl, kind, path }
 }

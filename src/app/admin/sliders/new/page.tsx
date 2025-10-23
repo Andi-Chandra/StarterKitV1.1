@@ -367,9 +367,9 @@ export default function NewSliderPage() {
                             </SelectContent>
                           </Select>
                         </div>
-                        <div className="space-y-2">
-                          <Label>Preview</Label>
-                          <div className="border rounded-md p-2 h-40 flex items-center justify-center bg-muted/30">
+                          <div className="space-y-2">
+                            <Label>Preview</Label>
+                          <div className="border rounded-md p-2 flex items-center justify-center bg-muted/30">
                             {(() => {
                               const sel = mediaOptions.find(o => o.id === item.mediaId)
                               if (!sel) {
@@ -377,8 +377,8 @@ export default function NewSliderPage() {
                               }
                               if (sel.fileType === 'IMAGE') {
                                 return (
-                                  <div className="relative w-full h-36">
-                                    <ImageWithFallback src={sel.fileUrl} alt={sel.title} fill className="object-contain" />
+                                  <div className="relative w-full aspect-video">
+                                    <ImageWithFallback src={sel.fileUrl} alt={sel.title} fill className="object-cover" />
                                   </div>
                                 )
                               }

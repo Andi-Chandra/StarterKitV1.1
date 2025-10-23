@@ -242,7 +242,7 @@ export default function EditSliderPage() {
                               const sel = mediaOptions.find(o => o.id === item.mediaId)
                               if (!sel) return <span className="text-sm text-muted-foreground">No media selected</span>
                               if (sel.fileType === 'IMAGE') {
-                                return <div className="relative w-full h-36"><ImageWithFallback src={sel.fileUrl} alt={sel.title} fill className="object-contain" /></div>
+                                return <div className="relative w-full aspect-video"><ImageWithFallback src={sel.fileUrl} alt={sel.title} fill className="object-cover" /></div>
                               }
                               return (
                                 <div className="flex items-center gap-2 text-muted-foreground">

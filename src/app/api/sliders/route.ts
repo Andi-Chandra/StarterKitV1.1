@@ -5,6 +5,7 @@ import { db } from '@/lib/db'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { Prisma } from '@prisma/client'
+import { randomUUID } from 'crypto'
 
 function isDev() {
   return process.env.NODE_ENV !== 'production'
@@ -217,6 +218,7 @@ export async function POST(request: NextRequest) {
     // Create slider
     const slider = await db.slider.create({
       data: {
+        id: randomUUID(),
         name,
         type,
         isActive,
@@ -230,8 +232,14 @@ export async function POST(request: NextRequest) {
     if (items && items.length > 0) {
       await db.sliderItem.createMany({
         data: items.map(item => ({
-          ...item,
-          sliderId: slider.id
+          id: randomUUID(),
+          title: item.title,
+          subtitle: item.subtitle,
+          callToAction: item.callToAction,
+          callToActionUrl: item.callToActionUrl,
+          sortOrder: item.sortOrder,
+          mediaId: item.mediaId,
+          sliderId: slider.id,
         }))
       })
     }

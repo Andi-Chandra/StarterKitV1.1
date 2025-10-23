@@ -20,9 +20,10 @@ export interface VideoSlideData {
 }
 
 export function transformImageSliders(sliders: Slider[]): ImageSlideData[] {
-  const imageSlider = sliders.find(slider => slider.type === 'IMAGE' && slider.isActive)
-  
-  if (!imageSlider || !imageSlider.items.length) {
+  // Prefer the first active IMAGE slider that actually has items
+  const imageSlider = sliders.find(slider => slider.type === 'IMAGE' && slider.isActive && slider.items.length > 0)
+
+  if (!imageSlider) {
     // Return fallback data
     return [
       {
@@ -47,9 +48,9 @@ export function transformImageSliders(sliders: Slider[]): ImageSlideData[] {
 }
 
 export function transformVideoSliders(sliders: Slider[]): VideoSlideData[] {
-  const videoSlider = sliders.find(slider => slider.type === 'VIDEO' && slider.isActive)
-  
-  if (!videoSlider || !videoSlider.items.length) {
+  const videoSlider = sliders.find(slider => slider.type === 'VIDEO' && slider.isActive && slider.items.length > 0)
+
+  if (!videoSlider) {
     // Return fallback data
     return [
       {

@@ -181,7 +181,7 @@ export default function AdminSlidersPage() {
                             {slider.type}
                           </Badge>
                           <Badge variant="outline">
-                            {slider.items.length} items
+                            {slider.items.length} {slider.items.length === 1 ? 'item' : 'items'}
                           </Badge>
                         </div>
                       </div>

@@ -255,10 +255,39 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Create slider error:', error)
-    
+
+    // Input validation errors
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { message: 'Invalid input', errors: error.errors },
+        { status: 400 }
+      )
+    }
+
+    // Map common Prisma errors to clearer responses
+    const e = error as any
+    if (e instanceof Prisma.PrismaClientInitializationError) {
+      return NextResponse.json(
+        { code: 'DB_INIT_FAILED', message: 'Database not available' },
+        { status: 503 }
+      )
+    }
+    if (e instanceof Prisma.PrismaClientKnownRequestError) {
+      // P2003: Foreign key constraint failed (e.g., mediaId does not exist)
+      if (e.code === 'P2003') {
+        return NextResponse.json(
+          { code: 'FK_CONSTRAINT', message: 'Related record not found (check mediaId/sliderId)' },
+          { status: 409 }
+        )
+      }
+      return NextResponse.json(
+        { code: e.code, message: 'Database request error', detail: e.message },
+        { status: 500 }
+      )
+    }
+    if (e instanceof Prisma.PrismaClientValidationError) {
+      return NextResponse.json(
+        { code: 'VALIDATION_ERROR', message: 'Invalid data or missing required fields' },
         { status: 400 }
       )
     }

@@ -193,6 +193,7 @@ export default function NewMediaPage() {
               {/* File Upload */}
               <div className="space-y-2">
                 <Label>Media File</Label>
+                <p className="text-xs text-muted-foreground">Images up to 5 MB • Videos up to 100 MB</p>
                 <div
                   className={cn(
                     "border-2 border-dashed rounded-lg p-8 text-center transition-colors",

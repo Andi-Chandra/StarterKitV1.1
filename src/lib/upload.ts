@@ -22,6 +22,16 @@ function makeId() {
  * Ensure a public bucket named `media` exists in your Supabase project.
  */
 export async function uploadToSupabaseStorage(file: File): Promise<{ url: string; kind: UploadKind; path: string }>{
+  // Client-side size guardrails for better UX
+  const MAX_IMAGE_BYTES = 5 * 1024 * 1024 // 5 MB
+  const MAX_VIDEO_BYTES = 100 * 1024 * 1024 // 100 MB
+  const isVideo = file.type.startsWith('video/')
+  if (!isVideo && file.size > MAX_IMAGE_BYTES) {
+    throw new Error('Image is too large. Max size is 5 MB.')
+  }
+  if (isVideo && file.size > MAX_VIDEO_BYTES) {
+    throw new Error('Video is too large. Max size is 100 MB.')
+  }
   // Ensure the storage bucket exists (server will create if missing)
   try {
     await fetch('/api/storage/ensure-bucket', { method: 'POST' })
@@ -34,7 +44,12 @@ export async function uploadToSupabaseStorage(file: File): Promise<{ url: string
   const signed = await fetch('/api/storage/signed-upload', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ kind, ext, contentType: file.type || (kind === 'video' ? 'video/mp4' : 'image/jpeg') }),
+    body: JSON.stringify({
+      kind,
+      ext,
+      size: file.size,
+      contentType: file.type || (kind === 'video' ? 'video/mp4' : 'image/jpeg'),
+    }),
   })
   if (!signed.ok) {
     const text = await signed.text().catch(() => '')

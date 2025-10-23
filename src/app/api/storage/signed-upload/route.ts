@@ -15,6 +15,25 @@ export async function POST(req: NextRequest) {
     const kind: 'image' | 'video' = body?.kind === 'video' ? 'video' : 'image'
     const extRaw: string | undefined = typeof body?.ext === 'string' ? body.ext : undefined
     const contentType: string | undefined = typeof body?.contentType === 'string' ? body.contentType : undefined
+    const size = typeof body?.size === 'number' ? body.size : undefined
+
+    // Optional server-side size enforcement (best-effort; upload uses signed URL direct to Storage)
+    const MAX_IMAGE_BYTES = 5 * 1024 * 1024 // 5 MB
+    const MAX_VIDEO_BYTES = 100 * 1024 * 1024 // 100 MB
+    if (typeof size === 'number') {
+      if (kind === 'image' && size > MAX_IMAGE_BYTES) {
+        return NextResponse.json(
+          { message: 'Image exceeds maximum size of 5 MB' },
+          { status: 413 }
+        )
+      }
+      if (kind === 'video' && size > MAX_VIDEO_BYTES) {
+        return NextResponse.json(
+          { message: 'Video exceeds maximum size of 100 MB' },
+          { status: 413 }
+        )
+      }
+    }
 
     const id = crypto.randomUUID()
     const ext = (extRaw || (kind === 'video' ? 'mp4' : 'jpg')).replace(/[^a-zA-Z0-9]/g, '') || (kind === 'video' ? 'mp4' : 'jpg')
@@ -35,4 +54,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: 'Internal error', error: e?.message || 'Unknown' }, { status: 500 })
   }
 }
-

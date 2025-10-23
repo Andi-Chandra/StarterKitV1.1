@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 import { z } from 'zod'
 import { db } from '@/lib/db'
 import { getServerSession } from 'next-auth'
@@ -146,30 +147,37 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    return NextResponse.json({
-      sliders
-    })
+    return NextResponse.json(
+      { sliders },
+      { headers: { 'Cache-Control': 'no-store' } }
+    )
 
   } catch (error) {
     console.error('Fetch sliders error:', error)
 
     // Development fallback always on
     if (isDev()) {
-      return NextResponse.json({
-        sliders: mockSliders(),
-        mock: true,
-        hint: 'DB query failed. Ensure DATABASE_URL is set, then run: npm run db:push && npm run db:seed',
-        error: (error as Error)?.message ?? 'Unknown error'
-      })
+      return NextResponse.json(
+        {
+          sliders: mockSliders(),
+          mock: true,
+          hint: 'DB query failed. Ensure DATABASE_URL is set, then run: npm run db:push && npm run db:seed',
+          error: (error as Error)?.message ?? 'Unknown error'
+        },
+        { headers: { 'Cache-Control': 'no-store' } }
+      )
     }
 
     // Optional production fallback (opt-in via env)
     if (shouldProdFallback()) {
-      return NextResponse.json({
-        sliders: mockSliders(),
-        mock: true,
-        hint: 'Production fallback enabled. Investigate DB connectivity and disable fallback once fixed.',
-      })
+      return NextResponse.json(
+        {
+          sliders: mockSliders(),
+          mock: true,
+          hint: 'Production fallback enabled. Investigate DB connectivity and disable fallback once fixed.',
+        },
+        { headers: { 'Cache-Control': 'no-store' } }
+      )
     }
 
     // Map Prisma errors to clearer statuses/messages

@@ -74,7 +74,6 @@ export default function SignInContent() {
         email: formData.email,
         password: formData.password,
         redirect: false,
-        callbackUrl: '/admin',
       })
 
       // Normalize NextAuth responses. For credentials with redirect: false,

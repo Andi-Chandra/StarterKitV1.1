@@ -1,6 +1,10 @@
 import NextAuth from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 
+// Optional: allow configuring a single demo/admin account via env vars
+const DEMO_EMAIL = process.env.DEMO_AUTH_EMAIL || 'demo@example.com'
+const DEMO_PASSWORD = process.env.DEMO_AUTH_PASSWORD || 'demo'
+
 export const authOptions = {
   providers: [
     CredentialsProvider({
@@ -15,29 +19,21 @@ export const authOptions = {
             return null
           }
 
-          // For demo purposes, accept any email/password combination
-          // In production, implement proper database authentication
-          if (credentials.email === 'demo@example.com' && credentials.password === 'demo') {
+          // Strict demo login only. Remove or replace with real verification.
+          if (
+            credentials.email === DEMO_EMAIL &&
+            credentials.password === DEMO_PASSWORD
+          ) {
             return {
               id: 'demo-user-id',
-              email: 'demo@example.com',
+              email: DEMO_EMAIL,
               name: 'Demo User',
               username: 'demo',
               role: 'user',
             }
           }
 
-          // For other emails, just check format and accept any password
-          if (credentials.email.includes('@')) {
-            return {
-              id: 'user-' + Math.random().toString(36).substr(2, 9),
-              email: credentials.email,
-              name: credentials.email.split('@')[0],
-              username: credentials.email.split('@')[0],
-              role: 'user',
-            }
-          }
-
+          // Otherwise, reject. Implement real user verification here (e.g., Supabase, Prisma).
           return null
         } catch (error) {
           console.error('Auth error:', error)
@@ -56,33 +52,30 @@ export const authOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id
-        token.username = user.username
-        token.role = user.role
+        token.id = (user as any).id
+        token.username = (user as any).username
+        token.role = (user as any).role
       }
       return token
     },
     async session({ session, token }) {
-      if (token) {
-        session.user.id = token.id as string
-        session.user.username = token.username as string
-        session.user.role = token.role as string
+      if (token && session.user) {
+        ;(session.user as any).id = token.id as string
+        ;(session.user as any).username = token.username as string
+        ;(session.user as any).role = token.role as string
       }
       return session
     },
     async redirect({ url, baseUrl }: { url: string; baseUrl: string }) {
       try {
-        // Normalize URL for comparison
         const to = url.startsWith('/') ? new URL(url, baseUrl) : new URL(url)
         const path = to.pathname
         if (path === '/dashboard') {
           return '/admin'
         }
-        // Allow same-origin redirects
         if (to.origin === new URL(baseUrl).origin) {
           return to.pathname + to.search + to.hash
         }
-        // Fallback to base URL
         return baseUrl
       } catch {
         return '/admin'

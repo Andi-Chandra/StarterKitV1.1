@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import NextAuthProvider from "@/components/providers/session-provider";
+import { DebugErrorListener } from '@/components/providers/debug-error-listener'
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -46,6 +47,7 @@ export default function RootLayout({
         <NextAuthProvider>
           {children}
         </NextAuthProvider>
+        {process.env.NODE_ENV !== 'production' ? <DebugErrorListener /> : null}
         <Toaster />
       </body>
     </html>

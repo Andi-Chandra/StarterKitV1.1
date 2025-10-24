@@ -77,16 +77,20 @@ export default function SignInContent() {
         callbackUrl: '/admin',
       })
 
-      if (result?.error) {
-        setError(result.error || 'Invalid email or password')
+      // Normalize NextAuth responses. For credentials with redirect: false,
+      // result.url can point to /api/auth/callback/credentials which is GET-only and
+      // triggers "Callback for provider type credentials not supported" if navigated.
+      if (!result || result.error) {
+        // Friendly message for common credentials errors
+        const msg =
+          result?.error === 'CredentialsSignin'
+            ? 'Invalid email or password'
+            : result?.error || 'Invalid email or password'
+        setError(msg)
         return
       }
 
-      // Successful sign-in
-      if (result?.url) {
-        router.push(result.url)
-        return
-      }
+      // On success, go directly to the callbackUrl instead of result.url
       router.push('/admin')
     } catch (err) {
       setError('Something went wrong. Please try again.')

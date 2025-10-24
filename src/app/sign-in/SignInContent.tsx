@@ -13,7 +13,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { Header } from '@/components/layout/Header'
-import { Footer } from '@/components/layout/Footer'
+// Footer intentionally not shown on sign-in page
 
 export default function SignInContent() {
   const router = useRouter()
@@ -212,7 +212,6 @@ export default function SignInContent() {
         </Card>
       </main>
       
-      <Footer />
     </div>
   )
 }

@@ -35,6 +35,20 @@ export default function SignInContent() {
     }
   }, [searchParams, router])
 
+  // Surface NextAuth error query (e.g., CredentialsSignin)
+  useEffect(() => {
+    if (!searchParams) return
+    const err = searchParams.get('error')
+    if (!err) return
+    if (err === 'CredentialsSignin') {
+      setError('Invalid email or password')
+    } else if (err === 'OAuthAccountNotLinked') {
+      setError('Please sign in with the originally used provider')
+    } else {
+      setError('Sign in failed. Please try again.')
+    }
+  }, [searchParams])
+
   // If already signed in, send to admin
   useEffect(() => {
     if (status === 'authenticated') {
@@ -70,27 +84,12 @@ export default function SignInContent() {
       }
 
       // Use NextAuth credentials provider
-      const result = await signIn('credentials', {
+      await signIn('credentials', {
         email: formData.email,
         password: formData.password,
-        redirect: false,
+        redirect: true,
+        callbackUrl: '/admin',
       })
-
-      // Normalize NextAuth responses. For credentials with redirect: false,
-      // result.url can point to /api/auth/callback/credentials which is GET-only and
-      // triggers "Callback for provider type credentials not supported" if navigated.
-      if (!result || result.error) {
-        // Friendly message for common credentials errors
-        const msg =
-          result?.error === 'CredentialsSignin'
-            ? 'Invalid email or password'
-            : result?.error || 'Invalid email or password'
-        setError(msg)
-        return
-      }
-
-      // On success, go directly to the callbackUrl instead of result.url
-      router.push('/admin')
     } catch (err) {
       setError('Something went wrong. Please try again.')
     } finally {

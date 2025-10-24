@@ -89,6 +89,7 @@ export default function SignInContent() {
       const result = await signIn('credentials', {
         email: formData.email,
         password: formData.password,
+        callbackUrl: absoluteCallback,
         redirect: false
       })
 

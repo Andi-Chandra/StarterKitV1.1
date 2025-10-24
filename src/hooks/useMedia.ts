@@ -119,13 +119,13 @@ export function useMedia() {
           {
             id: '2',
             title: 'Gallery',
-            url: '#gallery',
+            url: '/#gallery',
             isExternal: false
           },
           {
             id: '3',
             title: 'Videos',
-            url: '#videos',
+            url: '/#videos',
             isExternal: false
           },
           {

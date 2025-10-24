@@ -71,10 +71,10 @@ export function Footer({
     {
       title: 'Product',
       links: [
-        { title: 'Features', url: '/features' },
-        { title: 'Pricing', url: '/pricing' },
-        { title: 'Gallery', url: '/gallery' },
-        { title: 'Testimonials', url: '/testimonials' }
+        { title: 'Features', url: '/#features' },
+        { title: 'Pricing', url: '#' },
+        { title: 'Gallery', url: '/#gallery' },
+        { title: 'Testimonials', url: '#' }
       ]
     },
     {

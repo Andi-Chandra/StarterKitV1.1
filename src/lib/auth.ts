@@ -1,6 +1,6 @@
 import NextAuth from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { supabase, getSupabaseAdmin } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
 
 export const authOptions = {
   providers: [
@@ -14,8 +14,17 @@ export const authOptions = {
         try {
           if (!credentials?.email || !credentials?.password) return null
 
+          // Create a Supabase client here to avoid module-load errors if envs are missing
+          const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+          const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+          if (!supabaseUrl || !supabaseAnonKey) {
+            console.error('Supabase env missing: NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY')
+            return null
+          }
+          const sb = createClient(supabaseUrl, supabaseAnonKey)
+
           // Verify credentials against Supabase Auth
-          const { data, error } = await supabase.auth.signInWithPassword({
+          const { data, error } = await sb.auth.signInWithPassword({
             email: credentials.email,
             password: credentials.password,
           })
@@ -24,17 +33,24 @@ export const authOptions = {
 
           const authUser = data.user
 
-          // Optionally enrich profile from application users table
+          // Optionally enrich profile from application users table via service role if present
           let profile: any = {}
           try {
-            const admin = getSupabaseAdmin()
-            const { data: userRow } = await admin
-              .from('users')
-              .select('id,email,name,role,username')
-              .eq('id', authUser.id)
-              .single()
-            if (userRow) profile = userRow
-          } catch {}
+            const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+            if (serviceRoleKey) {
+              const admin = createClient(supabaseUrl, serviceRoleKey, {
+                auth: { autoRefreshToken: false, persistSession: false },
+              })
+              const { data: userRow } = await admin
+                .from('users')
+                .select('id,email,name,role,username')
+                .eq('id', authUser.id)
+                .single()
+              if (userRow) profile = userRow
+            }
+          } catch (e) {
+            console.warn('Profile enrichment skipped:', (e as any)?.message)
+          }
 
           return {
             id: authUser.id,

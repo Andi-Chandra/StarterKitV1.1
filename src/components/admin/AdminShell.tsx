@@ -1,8 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { useSession } from 'next-auth/react'
+import { useSession, signOut } from 'next-auth/react'
 import { usePathname } from 'next/navigation'
+import { Button } from '@/components/ui/button'
 import {
   Sidebar,
   SidebarContent,
@@ -19,7 +20,7 @@ import {
   SidebarSeparator,
   SidebarTrigger,
 } from '@/components/ui/sidebar'
-import { LayoutDashboard, Image, Folder, Settings } from 'lucide-react'
+import { LayoutDashboard, Image, Folder, Settings, LogOut } from 'lucide-react'
 
 type AdminShellProps = {
   children: React.ReactNode
@@ -101,6 +102,11 @@ export default function AdminShell({ children }: AdminShellProps) {
                 {session.user.email}
               </div>
             )}
+            <div className="px-2 py-1">
+              <Button size="sm" variant="outline" className="w-full" onClick={() => signOut({ callbackUrl: '/' })}>
+                <LogOut className="h-4 w-4 mr-2" /> Sign Out
+              </Button>
+            </div>
           </SidebarFooter>
         </Sidebar>
         <SidebarInset>

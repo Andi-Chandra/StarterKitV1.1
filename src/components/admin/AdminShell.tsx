@@ -1,8 +1,6 @@
 'use client'
 
-import { useSession, signOut } from 'next-auth/react'
-import { Button } from '@/components/ui/button'
-import { LogOut } from 'lucide-react'
+import { useSession } from 'next-auth/react'
 
 type AdminShellProps = {
   children: React.ReactNode
@@ -22,9 +20,6 @@ export default function AdminShell({ children }: AdminShellProps) {
               {session.user.email}
             </span>
           )}
-          <Button size="sm" variant="outline" onClick={() => signOut({ callbackUrl: '/' })}>
-            <LogOut className="h-4 w-4 mr-2" /> Sign Out
-          </Button>
         </div>
       </div>
       {/* Page content */}
@@ -32,4 +27,3 @@ export default function AdminShell({ children }: AdminShellProps) {
     </div>
   )
 }
-

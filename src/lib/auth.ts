@@ -1,9 +1,6 @@
 import NextAuth from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-
-// Optional: allow configuring a single demo/admin account via env vars
-const DEMO_EMAIL = process.env.DEMO_AUTH_EMAIL || 'demo@example.com'
-const DEMO_PASSWORD = process.env.DEMO_AUTH_PASSWORD || 'demo'
+import { supabase, getSupabaseAdmin } from '@/lib/supabase'
 
 export const authOptions = {
   providers: [
@@ -15,26 +12,40 @@ export const authOptions = {
       },
       async authorize(credentials) {
         try {
-          if (!credentials?.email || !credentials?.password) {
-            return null
-          }
+          if (!credentials?.email || !credentials?.password) return null
 
-          // Strict demo login only. Remove or replace with real verification.
-          if (
-            credentials.email === DEMO_EMAIL &&
-            credentials.password === DEMO_PASSWORD
-          ) {
-            return {
-              id: 'demo-user-id',
-              email: DEMO_EMAIL,
-              name: 'Demo User',
-              username: 'demo',
-              role: 'user',
-            }
-          }
+          // Verify credentials against Supabase Auth
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email: credentials.email,
+            password: credentials.password,
+          })
 
-          // Otherwise, reject. Implement real user verification here (e.g., Supabase, Prisma).
-          return null
+          if (error || !data.user) return null
+
+          const authUser = data.user
+
+          // Optionally enrich profile from application users table
+          let profile: any = {}
+          try {
+            const admin = getSupabaseAdmin()
+            const { data: userRow } = await admin
+              .from('users')
+              .select('id,email,name,role,username')
+              .eq('id', authUser.id)
+              .single()
+            if (userRow) profile = userRow
+          } catch {}
+
+          return {
+            id: authUser.id,
+            email: authUser.email || credentials.email,
+            name:
+              profile.name ||
+              (authUser.user_metadata && (authUser.user_metadata as any).full_name) ||
+              (authUser.email ? authUser.email.split('@')[0] : 'User'),
+            username: profile.username || (authUser.email ? authUser.email.split('@')[0] : 'user'),
+            role: (profile.role || 'user').toString().toLowerCase(),
+          }
         } catch (error) {
           console.error('Auth error:', error)
           return null

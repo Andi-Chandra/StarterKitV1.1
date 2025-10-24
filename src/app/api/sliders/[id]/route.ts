@@ -27,14 +27,14 @@ const updateSliderSchema = z.object({
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
     }
-    const sliderId = params.id
+    const sliderId = (await params).id
     const body = await request.json()
     const updateData = updateSliderSchema.parse(body)
 
@@ -96,7 +96,7 @@ export async function PATCH(
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { message: 'Invalid input', errors: error.errors },
+        { message: 'Invalid input', errors: error.issues },
         { status: 400 }
       )
     }
@@ -124,14 +124,14 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
     }
-    const sliderId = params.id
+    const sliderId = (await params).id
 
     // Check if slider exists
     const slider = await db.slider.findUnique({
@@ -170,10 +170,10 @@ export async function DELETE(
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const sliderId = params.id
+    const sliderId = (await params).id
     const slider = await db.slider.findUnique({
       where: { id: sliderId },
       include: {

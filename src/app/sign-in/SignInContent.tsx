@@ -88,6 +88,7 @@ export default function SignInContent() {
         email: formData.email,
         password: formData.password,
         redirect: false,
+        callbackUrl: '/admin'
       })
 
       if (!result) {

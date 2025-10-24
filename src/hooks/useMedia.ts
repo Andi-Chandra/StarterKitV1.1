@@ -27,7 +27,7 @@ interface MediaCategory {
   }
 }
 
-interface Slider {
+export interface Slider {
   id: string
   name: string
   type: 'IMAGE' | 'VIDEO' | 'MIXED'

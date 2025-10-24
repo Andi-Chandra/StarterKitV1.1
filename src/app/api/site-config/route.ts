@@ -94,7 +94,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ message: 'Configuration updated', items: results })
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ message: 'Invalid input', errors: error.errors }, { status: 400 })
+      return NextResponse.json({ message: 'Invalid input', errors: error.issues }, { status: 400 })
     }
     const e = error as any
     if (e instanceof Prisma.PrismaClientInitializationError) {
@@ -106,4 +106,3 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ code: 'INTERNAL_ERROR', message: 'Internal server error' }, { status: 500 })
   }
 }
-

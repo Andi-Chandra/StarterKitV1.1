@@ -13,10 +13,10 @@ const updateCategorySchema = z.object({
 
 export async function GET(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = params.id
+    const id = (await params).id
     const category = await db.mediaCategory.findUnique({ where: { id } })
     if (!category) {
       return new Response(JSON.stringify({ message: 'Category not found' }), { status: 404 })
@@ -30,14 +30,14 @@ export async function GET(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
     }
-    const categoryId = params.id
+    const categoryId = (await params).id
 
     // Check if category exists
     const category = await db.mediaCategory.findUnique({
@@ -83,14 +83,14 @@ export async function DELETE(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
     }
-    const id = params.id
+    const id = (await params).id
     const body = await request.json()
     const data = updateCategorySchema.parse({
       ...body,
@@ -114,7 +114,7 @@ export async function PATCH(
   } catch (error) {
     console.error('Update category error:', error)
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ message: 'Invalid input', errors: error.errors }, { status: 400 })
+      return NextResponse.json({ message: 'Invalid input', errors: error.issues }, { status: 400 })
     }
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 })
   }

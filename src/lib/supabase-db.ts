@@ -147,8 +147,14 @@ export const db = {
         query = query.select('*, users(*)')
       }
       
-      if (take) query = query.limit(take)
-      if (skip) query = query.offset(skip)
+      if (typeof skip === 'number' && typeof take === 'number') {
+        query = query.range(skip, skip + Math.max(take - 1, 0))
+      } else if (typeof skip === 'number') {
+        // Default to a window of 50 items when only skip is provided
+        query = query.range(skip, skip + 49)
+      } else if (typeof take === 'number') {
+        query = query.limit(take)
+      }
       
       const { data, error } = await query
       if (error) throw error

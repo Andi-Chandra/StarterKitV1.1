@@ -1,10 +1,11 @@
-import { AuthOptions } from 'next-auth'
+import type { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { createClient } from '@supabase/supabase-js'
 
-export const authOptions: AuthOptions = {
+export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
+      id: 'credentials',
       name: 'credentials',
       credentials: {
         email: { label: 'Email', type: 'email' },
@@ -84,13 +85,13 @@ export const authOptions: AuthOptions = {
     },
     async session({ session, token }) {
       if (token && session.user) {
-        ;(session.user as any).id = token.id as string
-        ;(session.user as any).username = token.username as string
-        ;(session.user as any).role = token.role as string
+        session.user.id = token.id as string
+        session.user.username = token.username as string
+        session.user.role = token.role as string
       }
       return session
     },
-    async redirect({ url, baseUrl }: { url: string; baseUrl: string }) {
+    async redirect({ url, baseUrl }) {
       try {
         const to = url.startsWith('/') ? new URL(url, baseUrl) : new URL(url)
         const path = to.pathname

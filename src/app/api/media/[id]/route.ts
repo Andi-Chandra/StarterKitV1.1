@@ -16,10 +16,10 @@ const updateMediaSchema = z.object({
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const mediaId = params.id
+    const mediaId = (await params).id
     const mediaItem = await db.mediaItem.findUnique({
       where: { id: mediaId },
       include: { category: true, creator: true },
@@ -38,14 +38,14 @@ export async function GET(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
     }
-    const mediaId = params.id
+    const mediaId = (await params).id
 
     // Check if media item exists
     const mediaItem = await db.mediaItem.findUnique({
@@ -79,7 +79,7 @@ export async function DELETE(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -87,7 +87,7 @@ export async function PATCH(
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
     }
 
-    const mediaId = params.id
+    const mediaId = (await params).id
     const body = await request.json()
     const data = updateMediaSchema.parse({
       ...body,
@@ -110,7 +110,7 @@ export async function PATCH(
   } catch (error) {
     console.error('Update media error:', error)
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ message: 'Invalid input', errors: error.errors }, { status: 400 })
+      return NextResponse.json({ message: 'Invalid input', errors: error.issues }, { status: 400 })
     }
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 })
   }

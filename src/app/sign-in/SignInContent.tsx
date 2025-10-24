@@ -84,11 +84,13 @@ export default function SignInContent() {
       }
 
       // Use NextAuth credentials provider with SPA-style handling
+      const origin = typeof window !== 'undefined' ? window.location.origin : ''
+      const absoluteCallback = origin ? `${origin}/admin` : '/admin'
       const result = await signIn('credentials', {
         email: formData.email,
         password: formData.password,
         redirect: false,
-        callbackUrl: '/admin'
+        callbackUrl: absoluteCallback
       })
 
       if (!result) {
@@ -104,8 +106,10 @@ export default function SignInContent() {
     } catch (err) {
       console.error('Sign-in error:', err)
       const msg = err instanceof Error ? err.message : String(err)
-      if (typeof msg === 'string' && /Failed to fetch|NetworkError|TypeError/i.test(msg)) {
+      if (typeof msg === 'string' && /Failed to fetch|NetworkError/i.test(msg)) {
         setError('Cannot reach auth server. Check your network and NEXTAUTH_URL.')
+      } else if (typeof msg === 'string' && /Invalid URL/i.test(msg)) {
+        setError('Invalid URL. Ensure NEXTAUTH_URL is a full URL (e.g., http://localhost:3000) and callbackUrl is absolute.')
       } else {
         setError('Something went wrong. Please try again.')
       }

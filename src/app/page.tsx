@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useEffect } from 'react'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { ImageSlider } from '@/components/media/ImageSlider'
@@ -87,6 +88,16 @@ function ErrorState({ error, code }: { error: string; code?: string }) {
 export default function Home() {
   const { mediaItems, categories, sliders, navigationLinks, loading, error, errorCode } = useMedia()
   const { status } = useSession()
+
+  // If a Supabase recovery link lands on '/', forward it to the reset page
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const hash = window.location.hash || ''
+    if (hash.includes('access_token') && !window.location.pathname.includes('/reset-password')) {
+      // Preserve the original hash so tokens are not lost
+      window.location.href = `/reset-password${hash}`
+    }
+  }, [])
 
   if (loading) {
     return <LoadingSkeleton />

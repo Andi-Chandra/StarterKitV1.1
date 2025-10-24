@@ -14,13 +14,9 @@ export const authOptions: AuthOptions = {
         try {
           if (!credentials?.email || !credentials?.password) return null
 
-          // Create a Supabase client here to avoid module-load errors if envs are missing
-          const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-          const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-          if (!supabaseUrl || !supabaseAnonKey) {
-            console.error('Supabase env missing: NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY')
-            return null
-          }
+          // Create a Supabase client with the public anon key
+          const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://rcxjtnojxtugtpjtydzu.supabase.co'
+          const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjeGp0bm9qeHR1Z3RwanR5ZHp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxMjIzOTAsImV4cCI6MjA3NTY5ODM5MH0.eYFfChSM7YwhjkArKlYiBfU1vAiwYekM7YlgBiO_RyU'
           const sb = createClient(supabaseUrl, supabaseAnonKey)
 
           // Verify credentials against Supabase Auth
@@ -64,7 +60,7 @@ export const authOptions: AuthOptions = {
           }
         } catch (error) {
           console.error('Auth error:', error)
-          return null
+          throw new Error(error instanceof Error ? error.message : 'Authentication failed')
         }
       }
     })

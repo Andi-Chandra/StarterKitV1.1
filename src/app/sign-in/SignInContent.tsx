@@ -98,8 +98,8 @@ export default function SignInContent() {
         setError(result.error === 'CredentialsSignin' ? 'Invalid email or password' : result.error)
         return
       }
-      // Navigate to admin explicitly; avoid following result.url which may point to the callback route
-      router.push('/admin')
+      // Use replace instead of push to avoid history stack issues
+      router.replace('/admin')
     } catch (err) {
       setError('Something went wrong. Please try again.')
     } finally {

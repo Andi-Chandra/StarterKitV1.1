@@ -97,7 +97,7 @@ export default function SignInContent() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <Header hideAuthButtons />
       
       <main className="flex items-center justify-center py-12 px-4">
         <Card className="w-full max-w-md">
@@ -204,4 +204,3 @@ export default function SignInContent() {
     </div>
   )
 }
-

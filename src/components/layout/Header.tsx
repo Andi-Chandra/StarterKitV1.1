@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { useSession } from 'next-auth/react'
+import { usePathname } from 'next/navigation'
 import { Menu, X, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -27,15 +28,18 @@ interface HeaderProps {
   navigationLinks?: NavigationLink[]
   companyLogo?: string
   companyName?: string
+  hideAuthButtons?: boolean
 }
 
 export function Header({ 
   navigationLinks = [], 
   companyLogo = '/logo.svg',
-  companyName = 'PPS Belawan' 
+  companyName = 'PPS Belawan',
+  hideAuthButtons = false,
 }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const { status } = useSession()
+  const pathname = usePathname()
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen)
@@ -108,7 +112,7 @@ export function Header({
 
         {/* Auth Buttons */}
         <div className="flex items-center space-x-2">
-          {status === 'unauthenticated' && (
+          {status === 'unauthenticated' && !hideAuthButtons && pathname !== '/sign-in' && (
             <Button size="sm" asChild>
               <Link href="/sign-in">Sign In</Link>
             </Button>

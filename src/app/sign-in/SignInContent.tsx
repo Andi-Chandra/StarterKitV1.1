@@ -102,7 +102,13 @@ export default function SignInContent() {
       // Use replace instead of push to avoid history stack issues
       router.replace('/admin')
     } catch (err) {
-      setError('Something went wrong. Please try again.')
+      console.error('Sign-in error:', err)
+      const msg = err instanceof Error ? err.message : String(err)
+      if (typeof msg === 'string' && /Failed to fetch|NetworkError|TypeError/i.test(msg)) {
+        setError('Cannot reach auth server. Check your network and NEXTAUTH_URL.')
+      } else {
+        setError('Something went wrong. Please try again.')
+      }
     } finally {
       setIsLoading(false)
     }

@@ -69,6 +69,7 @@ export const authOptions = {
       }
     })
   ],
+  debug: process.env.NEXTAUTH_DEBUG === 'true',
   pages: {
     signIn: '/sign-in',
     error: '/sign-in',

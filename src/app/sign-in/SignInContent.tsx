@@ -83,13 +83,23 @@ export default function SignInContent() {
         return
       }
 
-      // Use NextAuth credentials provider
-      await signIn('credentials', {
+      // Use NextAuth credentials provider with SPA-style handling
+      const result = await signIn('credentials', {
         email: formData.email,
         password: formData.password,
-        redirect: true,
-        callbackUrl: '/admin',
+        redirect: false,
       })
+
+      if (!result) {
+        setError('Sign in failed. Please try again.')
+        return
+      }
+      if (result.error) {
+        setError(result.error === 'CredentialsSignin' ? 'Invalid email or password' : result.error)
+        return
+      }
+      // Navigate to admin explicitly; avoid following result.url which may point to the callback route
+      router.push('/admin')
     } catch (err) {
       setError('Something went wrong. Please try again.')
     } finally {

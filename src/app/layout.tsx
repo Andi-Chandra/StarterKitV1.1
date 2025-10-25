@@ -16,21 +16,39 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "PPS Belawan",
-  description: "Pangkalan Pendaratan Ikan PPS Belawan.",
-  keywords: ["PPS Belawan", "Perikanan", "Belawan", "Sumatera Utara"],
-  authors: [{ name: "PPS Belawan" }],
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://informasippsbelawan.vercel.app'),
+  title: {
+    default: 'PPS Belawan',
+    template: '%s | PPS Belawan',
+  },
+  description: 'Pelabuhan Perikanan Samudera Belawan.',
+  keywords: ['PPS Belawan', 'Perikanan', 'Belawan', 'Sumatera Utara'],
+  authors: [{ name: 'PPS Belawan' }],
+  alternates: {
+    canonical: '/',
+  },
   openGraph: {
-    title: "PPS Belawan",
-    description: "Pangkalan Pendaratan Ikan PPS Belawan",
-    url: "informasippsbelawan.vercel.app",
-    siteName: "PPS Belawan",
-    type: "website",
+    title: 'PPS Belawan',
+    description: 'Pelabuhan Perikanan Samudera Belawan.',
+    url: '/',
+    siteName: 'PPS Belawan',
+    type: 'website',
+    images: ['/logo.svg'],
   },
   twitter: {
-    card: "summary_large_image",
-    title: "PPS Belawan",
-    description: "Pangkalan Pendaratan Ikan PPS Belawan",
+    card: 'summary_large_image',
+    title: 'PPS Belawan',
+    description: 'Pelabuhan Perikanan Samudera Belawan.',
+    images: ['/logo.svg'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  icons: {
+    icon: '/logo.svg',
+    shortcut: '/logo.svg',
+    apple: '/logo.svg',
   },
 };
 
@@ -44,6 +62,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:px-3 focus:py-2 focus:rounded-md focus:bg-primary focus:text-primary-foreground"
+        >
+          Skip to main content
+        </a>
         <NextAuthProvider>
           {children}
         </NextAuthProvider>

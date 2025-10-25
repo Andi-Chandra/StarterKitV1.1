@@ -117,7 +117,7 @@ export default function Home() {
       <Header navigationLinks={navigationLinks} />
 
       {/* Main Content */}
-      <main>
+      <main id="main">
         {/* Hero Image Slider */}
         <section>
           <ImageSlider 
@@ -128,77 +128,16 @@ export default function Home() {
             showDots={true}
           />
         </section>
-
-        {/* Features Section */}
-        <section id="features" className="py-20">
-          <div className="container">
-            <div className="text-center mb-16">
-              <Badge className="mb-4">Features</Badge>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Everything You Need
-              </h2>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Our modern web app comes packed with powerful features to help you succeed.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <Card className="text-center">
-                <CardHeader>
-                  <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Zap className="h-6 w-6 text-primary" />
-                  </div>
-                  <CardTitle>Lightning Fast</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription>
-                    Built with performance in mind, our app delivers blazing fast speeds and smooth user experience.
-                  </CardDescription>
-                </CardContent>
-              </Card>
-
-              <Card className="text-center">
-                <CardHeader>
-                  <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Users className="h-6 w-6 text-primary" />
-                  </div>
-                  <CardTitle>User Friendly</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription>
-                    Intuitive design and seamless navigation make it easy for anyone to use and enjoy.
-                  </CardDescription>
-                </CardContent>
-              </Card>
-
-              <Card className="text-center">
-                <CardHeader>
-                  <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Star className="h-6 w-6 text-primary" />
-                  </div>
-                  <CardTitle>Premium Quality</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription>
-                    Experience the best in class features and design that sets new standards.
-                  </CardDescription>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
-
         {/* Video Slider Section */}
         {videoSlides.length > 0 && (
           <section id="videos" className="py-20 bg-muted/50">
             <div className="container">
               <div className="text-center mb-16">
-                <Badge className="mb-4">Videos</Badge>
                 <h2 className="text-3xl md:text-4xl font-bold mb-4">
                   Video Content
                 </h2>
                 <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                  Watch our video content and learn more about what we do.
+                  Watch our video content.
                 </p>
               </div>
 
@@ -218,7 +157,6 @@ export default function Home() {
           <section id="gallery" className="py-20">
             <div className="container">
               <div className="text-center mb-16">
-                <Badge className="mb-4">Gallery</Badge>
                 <h2 className="text-3xl md:text-4xl font-bold mb-4">
                   Image Gallery
                 </h2>
@@ -226,7 +164,6 @@ export default function Home() {
                   Browse through our collection of stunning images and visuals.
                 </p>
               </div>
-
               <Gallery 
                 mediaItems={mediaItems}
                 categories={categories}

@@ -123,7 +123,7 @@ export default function AdminShell({ children }: AdminShellProps) {
             </div>
           </div>
           {/* Page content */}
-          <main className="container py-4 md:py-6 lg:py-8">{children}</main>
+          <main id="main" className="container py-4 md:py-6 lg:py-8">{children}</main>
         </SidebarInset>
       </div>
     </SidebarProvider>

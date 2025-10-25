@@ -62,7 +62,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 export function Footer({
   companyInfo = {
     name: 'PPS Belawan',
-    description: 'Pangkalan Pendaratan Ikan Belawan',
+    description: 'Pelabuhan Perikanan Samudera Belawan',
     email: 'info@example.com',
     phone: '+62',
     address: 'Belawan, Sumatera Utara'

@@ -35,6 +35,27 @@ export default function AdminDashboard() {
   })
   const [isLoading, setIsLoading] = useState(true)
 
+  const fetchStats = async (): Promise<DashboardStats> => {
+    const [mediaData, categoriesData, slidersData] = await Promise.all([
+      fetch('/api/media?limit=1', { cache: 'no-store' })
+        .then(async (res) => (res.ok ? res.json() : null))
+        .catch(() => null),
+      fetch('/api/media/categories', { cache: 'no-store' })
+        .then(async (res) => (res.ok ? res.json() : null))
+        .catch(() => null),
+      fetch('/api/sliders', { cache: 'no-store' })
+        .then(async (res) => (res.ok ? res.json() : null))
+        .catch(() => null),
+    ])
+
+    return {
+      totalMedia: mediaData?.pagination?.total ?? mediaData?.mediaItems?.length ?? 0,
+      totalCategories: categoriesData?.categories?.length ?? 0,
+      totalSliders: slidersData?.sliders?.length ?? 0,
+      totalUsers: 0,
+    }
+  }
+
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/sign-in')
@@ -42,11 +63,27 @@ export default function AdminDashboard() {
     }
 
     if (status === 'authenticated') {
-      const timer = setTimeout(() => {
-        setStats({ totalMedia: 24, totalCategories: 6, totalSliders: 3, totalUsers: 12 })
-        setIsLoading(false)
-      }, 500)
-      return () => clearTimeout(timer)
+      let cancelled = false
+      setIsLoading(true)
+
+      fetchStats()
+        .then((data) => {
+          if (!cancelled) {
+            setStats(data)
+            setIsLoading(false)
+          }
+        })
+        .catch((error) => {
+          console.error('Failed to fetch dashboard stats:', error)
+          if (!cancelled) {
+            setStats((prev) => ({ ...prev, totalMedia: 0, totalCategories: 0, totalSliders: 0 }))
+            setIsLoading(false)
+          }
+        })
+
+      return () => {
+        cancelled = true
+      }
     }
   }, [router, status])
 
@@ -231,4 +268,3 @@ export default function AdminDashboard() {
     </div>
   )
 }
-

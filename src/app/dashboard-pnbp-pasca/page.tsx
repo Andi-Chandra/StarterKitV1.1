@@ -20,7 +20,7 @@ export default function DashboardPNBPPascaPage() {
       <Header navigationLinks={[]} />
 
       {/* Main Content */}
-      <main id="main" className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           {/* Iframe Container */}
           <Card className={`${isFullscreen ? 'fixed inset-0 z-50 rounded-none' : 'relative'}`}>
@@ -63,7 +63,6 @@ export default function DashboardPNBPPascaPage() {
                 frameBorder="0"
                 style={{ border: 0 }}
                 allowFullScreen
-                loading="lazy"
                 sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
                 title="Dashboard PNBP Pasca - Looker Studio"
               />

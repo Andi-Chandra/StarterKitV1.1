@@ -25,6 +25,12 @@
       ]
     },
     {
+      "source": "/api/auth/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store" }
+      ]
+    },
+    {
       "source": "/api/sliders",
       "headers": [
         { "key": "Cache-Control", "value": "no-store" }

@@ -34,7 +34,7 @@ function LoadingSkeleton() {
       </div>
 
       {/* Hero Slider Skeleton */}
-      <div className="relative w-full h-[600px] lg:h-[700px]">
+      <div className="relative w-full aspect-video">
         <Skeleton className="w-full h-full" />
       </div>
 

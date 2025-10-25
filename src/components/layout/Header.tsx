@@ -53,7 +53,7 @@ export function Header({
           <img
             src={companyLogo}
             alt={companyName}
-            className="h-8 w-8"
+            className="h-8 w-8 aspect-square object-contain"
           />
           <span className="font-bold text-xl">{companyName}</span>
         </Link>

@@ -117,12 +117,12 @@ export function ImageSlider({
               <Card className="border-0 rounded-none overflow-hidden">
                 <CardContent className="p-0 relative">
                   {/* Background Image */}
-                  <div className="relative w-full h-[600px] lg:h-[700px]">
+                  <div className="relative w-full aspect-video bg-black">
                     <ImageWithFallback
                       src={slide.imageUrl}
                       alt={slide.title}
                       fill
-                      className="object-cover"
+                      className="object-contain object-center"
                       priority={index === 0}
                     />
                     

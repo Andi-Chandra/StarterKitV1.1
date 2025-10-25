@@ -242,7 +242,7 @@ export default function AdminMediaPage() {
               )}>
                 <div className={cn(
                   "relative bg-muted",
-                  viewMode === 'grid' ? "aspect-square" : "w-48 h-32 flex-shrink-0"
+                  viewMode === 'grid' ? "aspect-square" : "w-48 aspect-[3/2] flex-shrink-0"
                 )}>
                   {item.fileType === 'IMAGE' ? (
                     <ImageWithFallback

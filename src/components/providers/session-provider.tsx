@@ -17,8 +17,14 @@ export default function NextAuthProvider({ children }: { children: React.ReactNo
   // Harden NextAuth client config if env misconfigured (e.g., invalid NEXTAUTH_URL)
   useEffect(() => {
     try {
-      const cfg = typeof window !== 'undefined' ? (window as any).__NEXTAUTH : undefined
-      if (!cfg) return
+      if (typeof window === 'undefined') return
+      const globalAny = window as any
+      const origin = window.location.origin
+      if (!globalAny.__NEXTAUTH) {
+        globalAny.__NEXTAUTH = { baseUrl: origin, basePath: '/api/auth' }
+        return
+      }
+      const cfg = globalAny.__NEXTAUTH
       const origin = window.location.origin
       const hasProtocol = (u?: string) => !!u && /^https?:\/\//i.test(u)
       // If baseUrl is missing or invalid, normalize it to the current origin

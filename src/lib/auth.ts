@@ -92,19 +92,47 @@ export const authOptions: NextAuthOptions = {
       return session
     },
     async redirect({ url, baseUrl }) {
-      try {
-        const to = url.startsWith('/') ? new URL(url, baseUrl) : new URL(url)
-        const path = to.pathname
-        if (path === '/dashboard') {
-          return '/admin'
+      const fallbackBase = process.env.NEXTAUTH_URL || 'http://localhost:3000'
+      const safeBase = (() => {
+        try {
+          return new URL(baseUrl || fallbackBase)
+        } catch {
+          return new URL(fallbackBase)
         }
-        if (to.origin === new URL(baseUrl).origin) {
-          return to.pathname + to.search + to.hash
-        }
-        return baseUrl
-      } catch {
+      })()
+
+      if (!url) {
         return '/admin'
       }
+
+      try {
+        if (url.startsWith('/')) {
+          if (url === '/dashboard') {
+            return '/admin'
+          }
+          return url
+        }
+
+        const target = new URL(url)
+        if (target.pathname === '/dashboard' && target.origin === safeBase.origin) {
+          return '/admin'
+        }
+        if (target.origin === safeBase.origin) {
+          return target.pathname + target.search + target.hash
+        }
+      } catch {
+        try {
+          const normalized = new URL(url.replace(/^\/+/, '/'), safeBase)
+          if (normalized.pathname === '/dashboard') {
+            return '/admin'
+          }
+          return normalized.pathname + normalized.search + normalized.hash
+        } catch {
+          return '/admin'
+        }
+      }
+
+      return safeBase.origin
     },
   },
   secret: process.env.NEXTAUTH_SECRET,

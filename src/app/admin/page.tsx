@@ -36,23 +36,22 @@ export default function AdminDashboard() {
   const [isLoading, setIsLoading] = useState(true)
 
   const fetchStats = async (): Promise<DashboardStats> => {
-    const [mediaData, categoriesData, slidersData] = await Promise.all([
-      fetch('/api/media?limit=1', { cache: 'no-store' })
-        .then(async (res) => (res.ok ? res.json() : null))
-        .catch(() => null),
-      fetch('/api/media/categories', { cache: 'no-store' })
-        .then(async (res) => (res.ok ? res.json() : null))
-        .catch(() => null),
-      fetch('/api/sliders', { cache: 'no-store' })
-        .then(async (res) => (res.ok ? res.json() : null))
-        .catch(() => null),
-    ])
+    const response = await fetch('/api/admin/stats', { cache: 'no-store' })
+    if (response.status === 401) {
+      const error = new Error('unauthorized')
+      ;(error as any).status = 401
+      throw error
+    }
+    if (!response.ok) {
+      throw new Error(`Failed to load stats: ${response.status}`)
+    }
 
+    const data = await response.json().catch(() => null)
     return {
-      totalMedia: mediaData?.pagination?.total ?? mediaData?.mediaItems?.length ?? 0,
-      totalCategories: categoriesData?.categories?.length ?? 0,
-      totalSliders: slidersData?.sliders?.length ?? 0,
-      totalUsers: 0,
+      totalMedia: data?.mediaCount ?? 0,
+      totalCategories: data?.categoryCount ?? 0,
+      totalSliders: data?.sliderCount ?? 0,
+      totalUsers: data?.userCount ?? 0,
     }
   }
 
@@ -76,8 +75,12 @@ export default function AdminDashboard() {
         .catch((error) => {
           console.error('Failed to fetch dashboard stats:', error)
           if (!cancelled) {
-            setStats((prev) => ({ ...prev, totalMedia: 0, totalCategories: 0, totalSliders: 0 }))
-            setIsLoading(false)
+            if ((error as any)?.status === 401 || error?.message === 'unauthorized') {
+              router.push('/sign-in')
+            } else {
+              setStats((prev) => ({ ...prev, totalMedia: 0, totalCategories: 0, totalSliders: 0, totalUsers: 0 }))
+              setIsLoading(false)
+            }
           }
         })
 

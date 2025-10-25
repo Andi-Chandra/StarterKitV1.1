@@ -51,6 +51,13 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
     }
     const userId = (session.user as any)?.id as string | undefined
+    let updaterId: string | null = null
+    if (userId) {
+      const existingUser = await db.user.findUnique({ where: { id: userId } })
+      if (existingUser) {
+        updaterId = existingUser.id
+      }
+    }
     const body = await request.json()
     const { updates } = updatesSchema.parse(body)
 
@@ -71,7 +78,7 @@ export async function PUT(request: NextRequest) {
           data: {
             value: valueString,
             description: u.description ?? existing.description,
-            updatedBy: userId ?? existing.updatedBy,
+            updatedBy: updaterId ?? existing.updatedBy,
           },
           select: { id: true, key: true, value: true, description: true, updatedAt: true, updatedBy: true },
         })
@@ -83,7 +90,7 @@ export async function PUT(request: NextRequest) {
             key: u.key,
             value: valueString,
             description: u.description ?? null,
-            updatedBy: userId ?? null,
+            updatedBy: updaterId,
           },
           select: { id: true, key: true, value: true, description: true, updatedAt: true, updatedBy: true },
         })

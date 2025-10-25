@@ -15,8 +15,22 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const rawSite = process.env.NEXT_PUBLIC_SITE_URL
+const normalizedSite = (() => {
+  try {
+    if (!rawSite) return 'https://informasippsbelawan.vercel.app'
+    const withProto = /^https?:\/\//i.test(rawSite) ? rawSite : `https://${rawSite}`
+    // Validate
+    // eslint-disable-next-line no-new
+    new URL(withProto)
+    return withProto
+  } catch {
+    return 'https://informasippsbelawan.vercel.app'
+  }
+})()
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://informasippsbelawan.vercel.app'),
+  metadataBase: new URL(normalizedSite),
   title: {
     default: 'PPS Belawan',
     template: '%s | PPS Belawan',

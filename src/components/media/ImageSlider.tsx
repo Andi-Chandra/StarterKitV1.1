@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useId, useRef, useState, type KeyboardEvent } from 'react'
 import useEmblaCarousel from 'embla-carousel-react'
 import { ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -25,6 +25,11 @@ interface ImageSliderProps {
   showArrows?: boolean
   showDots?: boolean
   showPlayPause?: boolean
+  pauseOnHover?: boolean
+  pauseOnFocus?: boolean
+  imageFit?: 'cover' | 'contain'
+  heightClass?: string
+  ariaLabel?: string
   className?: string
 }
 
@@ -35,6 +40,11 @@ export function ImageSlider({
   showArrows = true,
   showDots = true,
   showPlayPause = false,
+  pauseOnHover = true,
+  pauseOnFocus = true,
+  imageFit = 'contain',
+  heightClass = 'aspect-video',
+  ariaLabel = 'Image Slider',
   className
 }: ImageSliderProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
@@ -46,6 +56,11 @@ export function ImageSlider({
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [scrollSnaps, setScrollSnaps] = useState<number[]>([])
   const [isPlaying, setIsPlaying] = useState(autoPlay)
+  const [progress, setProgress] = useState(0)
+  const wasPlayingRef = useRef<boolean>(autoPlay)
+  const focusPauseRef = useRef<boolean>(false)
+  const hoverPauseRef = useRef<boolean>(false)
+  const sliderId = useId()
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return
@@ -97,6 +112,73 @@ export function ImageSlider({
     return () => clearInterval(interval)
   }, [emblaApi, isPlaying, autoPlayInterval])
 
+  // Progress bar for auto-play
+  useEffect(() => {
+    setProgress(0)
+    if (!isPlaying) return
+
+    const start = Date.now()
+    const tick = () => {
+      const elapsed = Date.now() - start
+      const pct = Math.min(100, (elapsed / autoPlayInterval) * 100)
+      setProgress(pct)
+      if (pct < 100 && isPlaying) {
+        rafId = requestAnimationFrame(tick)
+      }
+    }
+    let rafId = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(rafId)
+  }, [isPlaying, autoPlayInterval, selectedIndex])
+
+  // Handlers to pause/resume on hover/focus
+  const handleMouseEnter = useCallback(() => {
+    if (!pauseOnHover) return
+    hoverPauseRef.current = true
+    wasPlayingRef.current = isPlaying
+    setIsPlaying(false)
+  }, [isPlaying, pauseOnHover])
+
+  const handleMouseLeave = useCallback(() => {
+    if (!pauseOnHover) return
+    hoverPauseRef.current = false
+    if (wasPlayingRef.current && !focusPauseRef.current) {
+      setIsPlaying(true)
+    }
+  }, [pauseOnHover])
+
+  const handleFocus = useCallback(() => {
+    if (!pauseOnFocus) return
+    focusPauseRef.current = true
+    wasPlayingRef.current = isPlaying
+    setIsPlaying(false)
+  }, [isPlaying, pauseOnFocus])
+
+  const handleBlur = useCallback(() => {
+    if (!pauseOnFocus) return
+    focusPauseRef.current = false
+    if (wasPlayingRef.current && !hoverPauseRef.current) {
+      setIsPlaying(true)
+    }
+  }, [pauseOnFocus])
+
+  // Keyboard navigation
+  const handleKeyDown = useCallback((e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault()
+      scrollPrev()
+      setProgress(0)
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault()
+      scrollNext()
+      setProgress(0)
+    } else if (e.key === ' ' || e.code === 'Space') {
+      if (showPlayPause) {
+        e.preventDefault()
+        togglePlayPause()
+      }
+    }
+  }, [scrollPrev, scrollNext, togglePlayPause, showPlayPause])
+
   if (slides.length === 0) {
     return (
       <div className={cn("relative w-full h-96 bg-muted flex items-center justify-center", className)}>
@@ -106,7 +188,25 @@ export function ImageSlider({
   }
 
   return (
-    <div className={cn("relative w-full", className)}>
+    <div
+      className={cn("relative w-full outline-none", className)}
+      role="region"
+      aria-roledescription="carousel"
+      aria-label={ariaLabel}
+      aria-live="polite"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+      id={sliderId}
+    >
+      {/* Visually hidden status for screen readers */}
+      <div className="sr-only" aria-live="polite">
+        Slide {selectedIndex + 1} of {slides.length}: {slides[selectedIndex]?.title}
+      </div>
+
       <div className="overflow-hidden" ref={emblaRef}>
         <div className="flex">
           {slides.map((slide, index) => (
@@ -117,12 +217,15 @@ export function ImageSlider({
               <Card className="border-0 rounded-none overflow-hidden">
                 <CardContent className="p-0 relative">
                   {/* Background Image */}
-                  <div className="relative w-full aspect-video bg-black">
+                  <div className={cn("relative w-full bg-black", heightClass)}>
                     <ImageWithFallback
                       src={slide.imageUrl}
                       alt={slide.title}
                       fill
-                      className="object-contain object-center"
+                      className={cn(
+                        imageFit === 'cover' ? 'object-cover' : 'object-contain',
+                        'object-center'
+                      )}
                       priority={index === 0}
                     />
                     
@@ -170,7 +273,9 @@ export function ImageSlider({
             variant="outline"
             size="icon"
             className="absolute left-4 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background border-white/20"
-            onClick={scrollPrev}
+            onClick={() => { setProgress(0); scrollPrev() }}
+            aria-label="Previous slide"
+            title="Previous slide"
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -178,7 +283,9 @@ export function ImageSlider({
             variant="outline"
             size="icon"
             className="absolute right-4 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background border-white/20"
-            onClick={scrollNext}
+            onClick={() => { setProgress(0); scrollNext() }}
+            aria-label="Next slide"
+            title="Next slide"
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -192,6 +299,8 @@ export function ImageSlider({
           size="icon"
           className="absolute bottom-4 right-4 bg-background/80 hover:bg-background border-white/20"
           onClick={togglePlayPause}
+          aria-label={isPlaying ? 'Pause autoplay' : 'Play autoplay'}
+          title={isPlaying ? 'Pause autoplay' : 'Play autoplay'}
         >
           {isPlaying ? (
             <Pause className="h-4 w-4" />
@@ -213,9 +322,23 @@ export function ImageSlider({
                   ? "w-8 bg-white"
                   : "bg-white/50 hover:bg-white/75"
               )}
-              onClick={() => scrollTo(index)}
+              onClick={() => { setProgress(0); scrollTo(index) }}
+              aria-label={`Go to slide ${index + 1}`}
+              aria-controls={sliderId}
+              aria-current={selectedIndex === index ? 'true' : undefined}
             />
           ))}
+        </div>
+      )}
+
+      {/* Autoplay progress bar */}
+      {autoPlay && (
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
+          <div
+            className="h-full bg-white/80 transition-[width]"
+            style={{ width: `${isPlaying ? progress : 0}%` }}
+            aria-hidden="true"
+          />
         </div>
       )}
     </div>

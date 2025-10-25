@@ -42,7 +42,7 @@ export default function AdminCategoriesPage() {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('/api/media/categories')
+      const response = await fetch('/api/media/categories', { cache: 'no-store' })
       if (response.ok) {
         const data = await response.json()
         setCategories(data.categories || [])

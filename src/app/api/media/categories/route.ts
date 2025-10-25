@@ -20,9 +20,10 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    return NextResponse.json({
-      categories
-    })
+    return NextResponse.json(
+      { categories },
+      { headers: { 'Cache-Control': 'no-store, max-age=0, must-revalidate' } }
+    )
 
   } catch (error) {
     console.error('Fetch categories error:', error)

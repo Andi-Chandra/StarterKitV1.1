@@ -33,6 +33,12 @@ export default function AdminShell({ children }: AdminShellProps) {
   const pathname = usePathname()
 
   const isActive = (href: string) => pathname === href
+  const handleSignOut = async () => {
+    const result = await signOut()
+    if (!result.error) {
+      router.push('/')
+    }
+  }
 
   return (
     <SidebarProvider>
@@ -131,9 +137,3 @@ export default function AdminShell({ children }: AdminShellProps) {
     </SidebarProvider>
   )
 }
-  const handleSignOut = async () => {
-    const result = await signOut()
-    if (!result.error) {
-      router.push('/')
-    }
-  }

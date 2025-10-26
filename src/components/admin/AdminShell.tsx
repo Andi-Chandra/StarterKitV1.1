@@ -1,8 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useSession, signOut } from 'next-auth/react'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import {
   Sidebar,
@@ -21,13 +20,16 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar'
 import { LayoutDashboard, Image, Folder, Settings, LogOut } from 'lucide-react'
+import { useAuth, useSession } from '@/components/providers/session-provider'
 
 type AdminShellProps = {
   children: React.ReactNode
 }
 
 export default function AdminShell({ children }: AdminShellProps) {
+  const router = useRouter()
   const { data: session } = useSession()
+  const { signOut } = useAuth()
   const pathname = usePathname()
 
   const isActive = (href: string) => pathname === href
@@ -103,7 +105,7 @@ export default function AdminShell({ children }: AdminShellProps) {
               </div>
             )}
             <div className="px-2 py-1">
-              <Button size="sm" variant="outline" className="w-full" onClick={() => signOut({ callbackUrl: '/' })}>
+              <Button size="sm" variant="outline" className="w-full" onClick={handleSignOut}>
                 <LogOut className="h-4 w-4 mr-2" /> Sign Out
               </Button>
             </div>
@@ -129,3 +131,9 @@ export default function AdminShell({ children }: AdminShellProps) {
     </SidebarProvider>
   )
 }
+  const handleSignOut = async () => {
+    const result = await signOut()
+    if (!result.error) {
+      router.push('/')
+    }
+  }

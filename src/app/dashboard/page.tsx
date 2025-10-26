@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { useSession, signOut } from 'next-auth/react'
+import { useAuth, useSession } from '@/components/providers/session-provider'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -13,6 +13,7 @@ import { User, Mail, Calendar, LogOut, Settings } from 'lucide-react'
 export default function DashboardPage() {
   const router = useRouter()
   const { status, data } = useSession()
+  const { signOut } = useAuth()
 
   const user = useMemo(() => {
     const u = data?.user as any
@@ -31,8 +32,11 @@ export default function DashboardPage() {
     }
   }, [status, router])
 
-  const handleLogout = () => {
-    signOut({ callbackUrl: '/' })
+  const handleLogout = async () => {
+    const result = await signOut()
+    if (!result.error) {
+      router.push('/')
+    }
   }
 
   if (status === 'loading') {

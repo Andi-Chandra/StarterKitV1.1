@@ -3,8 +3,7 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 import { z } from 'zod'
 import { db } from '@/lib/db'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { requireSupabaseUser } from '@/lib/auth-server'
 import { Prisma } from '@prisma/client'
 import { randomUUID } from 'crypto'
 
@@ -30,8 +29,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session) {
+    const auth = await requireSupabaseUser(request)
+    if (!auth) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
     }
     const sliderId = (await params).id
@@ -127,8 +126,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session) {
+    const auth = await requireSupabaseUser(request)
+    if (!auth) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
     }
     const sliderId = (await params).id

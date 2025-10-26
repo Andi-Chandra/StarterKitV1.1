@@ -1,13 +1,12 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 export const runtime = 'nodejs'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { requireSupabaseUser } from '@/lib/auth-server'
 import { getSupabaseAdmin } from '@/lib/supabase'
 
-export async function POST() {
+export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session) {
+    const auth = await requireSupabaseUser(req)
+    if (!auth) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
     }
 
@@ -36,4 +35,3 @@ export async function POST() {
     return NextResponse.json({ ok: false, error: e?.message || 'Unknown error' }, { status: 500 })
   }
 }
-

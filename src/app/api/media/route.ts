@@ -4,8 +4,7 @@ import { z } from 'zod'
 import { db } from '@/lib/db'
 import { randomUUID } from 'crypto'
 import { Prisma } from '@prisma/client'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { requireSupabaseUser } from '@/lib/auth-server'
 
 function isDev() {
   return process.env.NODE_ENV !== 'production'
@@ -244,8 +243,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session) {
+    const auth = await requireSupabaseUser(request)
+    if (!auth) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
     }
     const body = await request.json()

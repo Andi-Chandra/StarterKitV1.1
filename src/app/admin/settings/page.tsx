@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link"
-import { useSession } from "next-auth/react"
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -13,6 +12,7 @@ import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { useAuth, useSession } from "@/components/providers/session-provider"
 
 export const dynamic = "force-dynamic"
 
@@ -20,6 +20,7 @@ type ConfigMap = Record<string, any>
 
 export default function AdminSettingsPage() {
   const { status } = useSession()
+  const { accessToken } = useAuth()
   const router = useRouter()
 
   const [loading, setLoading] = useState(true)
@@ -89,7 +90,17 @@ export default function AdminSettingsPage() {
           { key: "admin.email_notifications", value: !!draft.adminEmailNotifications, description: "Admin email notifications" },
         ],
       }
-      const res = await fetch("/api/site-config", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
+      if (!accessToken) {
+        throw new Error("Authentication required. Please sign in again.")
+      }
+      const res = await fetch("/api/site-config", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(payload),
+      })
       if (!res.ok) {
         const t = await res.text()
         throw new Error(t || `Failed to save (${res.status})`)

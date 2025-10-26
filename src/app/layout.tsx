@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
-import NextAuthProvider from "@/components/providers/session-provider";
+import SupabaseAuthProvider from "@/components/providers/session-provider";
 import { DebugErrorListener } from '@/components/providers/debug-error-listener'
 
 const geistSans = Geist({
@@ -82,9 +82,9 @@ export default function RootLayout({
         >
           Skip to main content
         </a>
-        <NextAuthProvider>
+        <SupabaseAuthProvider>
           {children}
-        </NextAuthProvider>
+        </SupabaseAuthProvider>
         {process.env.NODE_ENV !== 'production' ? <DebugErrorListener /> : null}
         <Toaster />
       </body>

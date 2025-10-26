@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
+import { useAuth, useSession } from '@/components/providers/session-provider'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -50,6 +50,7 @@ interface MediaItem {
 export default function AdminMediaPage() {
   const router = useRouter()
   const { status } = useSession()
+  const { accessToken } = useAuth()
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([])
   const [categories, setCategories] = useState([])
   const [isLoading, setIsLoading] = useState(true)
@@ -99,8 +100,15 @@ export default function AdminMediaPage() {
     if (!confirm('Are you sure you want to delete this media item?')) return
 
     try {
+      if (!accessToken) {
+        alert('Authentication required. Please sign in again.')
+        return
+      }
       const response = await fetch(`/api/media/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       })
 
       if (response.ok) {

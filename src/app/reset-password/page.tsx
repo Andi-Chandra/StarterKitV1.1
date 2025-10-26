@@ -99,7 +99,7 @@ export default function ResetPasswordPage() {
         return
       }
       setSuccess(true)
-      // Optionally sign out Supabase session to avoid confusion with NextAuth
+      // Optionally sign out existing Supabase session to avoid stale credentials
       try { await supabase.auth.signOut() } catch {}
     } catch (e: any) {
       setError(e?.message || 'Unexpected error while updating password.')
@@ -209,4 +209,3 @@ export default function ResetPasswordPage() {
     </div>
   )
 }
-

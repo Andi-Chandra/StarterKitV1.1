@@ -4,8 +4,7 @@ import { z } from 'zod'
 import { db } from '@/lib/db'
 import { randomUUID } from 'crypto'
 import { Prisma } from '@prisma/client'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { requireSupabaseUser } from '@/lib/auth-server'
 
 const updatesSchema = z.object({
   updates: z
@@ -46,17 +45,15 @@ export async function GET() {
 
 export async function PUT(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session) {
+    const auth = await requireSupabaseUser(request)
+    if (!auth) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
     }
-    const userId = (session.user as any)?.id as string | undefined
+    const userId = auth.user.id
     let updaterId: string | null = null
-    if (userId) {
-      const existingUser = await db.user.findUnique({ where: { id: userId } })
-      if (existingUser) {
-        updaterId = existingUser.id
-      }
+    const existingUser = await db.user.findUnique({ where: { id: userId } })
+    if (existingUser) {
+      updaterId = existingUser.id
     }
     const body = await request.json()
     const { updates } = updatesSchema.parse(body)

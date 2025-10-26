@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
+import { useAuth, useSession } from '@/components/providers/session-provider'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -39,6 +39,7 @@ interface MediaOption {
 export default function NewSliderPage() {
   const router = useRouter()
   const { status } = useSession()
+  const { accessToken } = useAuth()
   const [formData, setFormData] = useState({
     name: '',
     type: 'IMAGE' as 'IMAGE' | 'VIDEO',
@@ -139,10 +140,16 @@ export default function NewSliderPage() {
         return
       }
 
+      if (!accessToken) {
+        setError('Authentication token missing. Please sign in again.')
+        return
+      }
+
       const response = await fetch('/api/sliders', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
           ...formData,

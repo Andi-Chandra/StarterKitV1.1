@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
+import { useAuth, useSession } from '@/components/providers/session-provider'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -46,6 +46,7 @@ type SortBy = 'newest' | 'oldest' | 'name' | 'items' | 'activeFirst'
 export default function AdminSlidersPage() {
   const router = useRouter()
   const { status } = useSession()
+  const { accessToken } = useAuth()
   const [sliders, setSliders] = useState<Slider[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
@@ -81,9 +82,16 @@ export default function AdminSlidersPage() {
 
   const duplicateSlider = async (slider: Slider) => {
     try {
+      if (!accessToken) {
+        alert('Authentication required. Please sign in again.')
+        return
+      }
       const response = await fetch('/api/sliders', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
         body: JSON.stringify({
           name: `${slider.name} (Copy)`,
           type: slider.type === 'MIXED' ? 'IMAGE' : slider.type, // API supports IMAGE|VIDEO
@@ -117,10 +125,15 @@ export default function AdminSlidersPage() {
 
   const handleToggleActive = async (id: string, isActive: boolean) => {
     try {
+      if (!accessToken) {
+        alert('Authentication required. Please sign in again.')
+        return
+      }
       const response = await fetch(`/api/sliders/${id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({ isActive: !isActive })
       })
@@ -142,8 +155,15 @@ export default function AdminSlidersPage() {
     if (!confirm('Are you sure you want to delete this slider?')) return
 
     try {
+      if (!accessToken) {
+        alert('Authentication required. Please sign in again.')
+        return
+      }
       const response = await fetch(`/api/sliders/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       })
 
       if (response.ok) {

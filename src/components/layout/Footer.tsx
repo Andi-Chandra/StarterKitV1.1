@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { useSession } from 'next-auth/react'
+import { useSession } from '@/components/providers/session-provider'
 import { 
   Facebook, 
   Twitter, 
@@ -238,4 +238,3 @@ export function Footer({
     </footer>
   )
 }
-

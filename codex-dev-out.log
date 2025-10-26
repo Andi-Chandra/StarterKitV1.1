@@ -1,0 +1,13 @@
+
+> nextjs_tailwind_shadcn_ts@0.1.0 dev
+> next dev
+
+   ▲ Next.js 15.3.5
+   - Local:        http://localhost:3001
+   - Network:      http://192.168.82.165:3001
+   - Environments: .env.local, .env
+
+ ✓ Starting...
+ ✓ Ready in 2.2s
+   Reload env: .env
+   Reload env: .env.local

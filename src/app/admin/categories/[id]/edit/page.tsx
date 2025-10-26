@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
+import { useAuth, useSession } from '@/components/providers/session-provider'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -15,6 +15,7 @@ export default function EditCategoryPage() {
   const router = useRouter()
   const params = useParams<{ id: string }>()
   const { status } = useSession()
+  const { accessToken } = useAuth()
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -38,7 +39,17 @@ export default function EditCategoryPage() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault(); setSaving(true); setError('')
     try {
-      const res = await fetch(`/api/media/categories/${params.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) })
+      if (!accessToken) {
+        throw new Error('Authentication required. Please sign in again.')
+      }
+      const res = await fetch(`/api/media/categories/${params.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(formData),
+      })
       if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || 'Update failed') }
       router.push('/admin/categories')
     } catch (e: any) { setError(e.message || 'Update failed') } finally { setSaving(false) }
@@ -82,4 +93,3 @@ export default function EditCategoryPage() {
     </div>
   )
 }
-

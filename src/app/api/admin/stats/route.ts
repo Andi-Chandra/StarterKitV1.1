@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { requireSupabaseUser } from '@/lib/auth-server'
 import { db } from '@/lib/db'
 
-export async function GET(_req: NextRequest) {
+export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session) {
+    const auth = await requireSupabaseUser(req)
+    if (!auth) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
     }
 

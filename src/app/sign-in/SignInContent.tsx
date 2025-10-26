@@ -230,8 +230,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { signIn } from 'next-auth/react'
-import { useSession } from 'next-auth/react'
+import { useAuth, useSession } from '@/components/providers/session-provider'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -244,6 +243,7 @@ import { Header } from '@/components/layout/Header'
 export default function SignInContent() {
   const router = useRouter()
   const { status } = useSession()
+  const { signIn } = useAuth()
   const searchParams = useSearchParams()
   const [formData, setFormData] = useState({
     email: '',
@@ -254,7 +254,7 @@ export default function SignInContent() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
 
-  // Surface NextAuth error query
+  // Surface auth error query
   useEffect(() => {
     if (!searchParams) return
     const error = searchParams.get('error')
@@ -310,30 +310,18 @@ export default function SignInContent() {
         return
       }
 
-      // Sign in with credentials
-      const result = await signIn('credentials', {
-        email: formData.email,
-        password: formData.password,
-        redirect: false,
-      })
+      const result = await signIn(formData.email, formData.password)
 
-      if (result?.error) {
-        switch (result.error) {
-          case 'CredentialsSignin':
-            setError('Invalid email or password')
-            break
-          default:
-            setError('Sign in failed. Please try again.')
+      if (result.error) {
+        if (/invalid/i.test(result.error)) {
+          setError('Invalid email or password')
+        } else {
+          setError(result.error || 'Sign in failed. Please try again.')
         }
         return
       }
 
-      // Successful sign-in
-      if (result?.url) {
-        router.push(result.url)
-      } else {
-        router.push('/admin')
-      }
+      router.push('/admin')
 
     } catch (err) {
       console.error('Sign-in error:', err)

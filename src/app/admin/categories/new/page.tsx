@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -10,9 +10,12 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { ArrowLeft, Loader2 } from 'lucide-react'
+import { useAuth, useSession } from '@/components/providers/session-provider'
 
 export default function NewCategoryPage() {
   const router = useRouter()
+  const { status } = useSession()
+  const { accessToken } = useAuth()
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
@@ -20,6 +23,12 @@ export default function NewCategoryPage() {
   })
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/sign-in')
+    }
+  }, [status, router])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -47,10 +56,16 @@ export default function NewCategoryPage() {
         return
       }
 
+      if (!accessToken) {
+        setError('Authentication token missing. Please sign in again.')
+        return
+      }
+
       const response = await fetch('/api/media/categories', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify(formData)
       })

@@ -3,8 +3,7 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 import { z } from 'zod'
 import { db } from '@/lib/db'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { requireSupabaseUser } from '@/lib/auth-server'
 import { Prisma } from '@prisma/client'
 import { randomUUID } from 'crypto'
 
@@ -216,8 +215,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session) {
+    const auth = await requireSupabaseUser(request)
+    if (!auth) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
     }
     const body = await request.json()

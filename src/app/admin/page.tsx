@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
+import { useAuth, useSession } from '@/components/providers/session-provider'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -27,6 +27,7 @@ interface DashboardStats {
 export default function AdminDashboard() {
   const router = useRouter()
   const { status } = useSession()
+  const { accessToken } = useAuth()
   const [stats, setStats] = useState<DashboardStats>({
     totalMedia: 0,
     totalCategories: 0,
@@ -35,8 +36,13 @@ export default function AdminDashboard() {
   })
   const [isLoading, setIsLoading] = useState(true)
 
-  const fetchStats = async (): Promise<DashboardStats> => {
-    const response = await fetch('/api/admin/stats', { cache: 'no-store' })
+  const fetchStats = async (token: string): Promise<DashboardStats> => {
+    const response = await fetch('/api/admin/stats', {
+      cache: 'no-store',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
     if (response.status === 401) {
       const error = new Error('unauthorized')
       ;(error as any).status = 401
@@ -62,10 +68,13 @@ export default function AdminDashboard() {
     }
 
     if (status === 'authenticated') {
+      if (!accessToken) {
+        return
+      }
       let cancelled = false
       setIsLoading(true)
 
-      fetchStats()
+      fetchStats(accessToken)
         .then((data) => {
           if (!cancelled) {
             setStats(data)
@@ -88,7 +97,7 @@ export default function AdminDashboard() {
         cancelled = true
       }
     }
-  }, [router, status])
+  }, [router, status, accessToken])
 
   if (isLoading) {
     return (

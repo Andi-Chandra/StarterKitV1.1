@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
+import { useAuth, useSession } from '@/components/providers/session-provider'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -18,6 +18,7 @@ export default function EditSliderPage() {
   const router = useRouter()
   const params = useParams<{ id: string }>()
   const { status } = useSession()
+  const { accessToken } = useAuth()
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -106,9 +107,15 @@ export default function EditSliderPage() {
       if (sliderItems.some(it => !it.title)) { setError('All items must have a title'); setSaving(false); return }
       if (sliderItems.some(it => !it.mediaId)) { setError('Each item must select a media'); setSaving(false); return }
 
+      if (!accessToken) {
+        throw new Error('Authentication required. Please sign in again.')
+      }
       const res = await fetch(`/api/sliders/${params.id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
         body: JSON.stringify({
           ...formData,
           items: sliderItems.map((it, idx) => ({

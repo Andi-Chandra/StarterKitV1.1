@@ -32,9 +32,21 @@ export async function uploadToSupabaseStorage(file: File): Promise<{ url: string
   if (isVideo && file.size > MAX_VIDEO_BYTES) {
     throw new Error('Video is too large. Max size is 100 MB.')
   }
+
+  const { data } = await supabase.auth.getSession()
+  const accessToken = data.session?.access_token
+  if (!accessToken) {
+    throw new Error('Authentication required to upload media. Please sign in again.')
+  }
+
   // Ensure the storage bucket exists (server will create if missing)
   try {
-    await fetch('/api/storage/ensure-bucket', { method: 'POST' })
+    await fetch('/api/storage/ensure-bucket', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
   } catch {}
 
   const kind: UploadKind = file.type.startsWith('video/') ? 'video' : 'image'
@@ -43,7 +55,10 @@ export async function uploadToSupabaseStorage(file: File): Promise<{ url: string
   // Request a signed upload token from the server (avoids Storage RLS violations)
   const signed = await fetch('/api/storage/signed-upload', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+    },
     body: JSON.stringify({
       kind,
       ext,

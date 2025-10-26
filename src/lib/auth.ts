@@ -100,35 +100,44 @@ export const authOptions: NextAuthOptions = {
           return new URL(fallbackBase)
         }
       })()
+      const adminUrl = new URL('/admin', safeBase).toString()
 
       if (!url) {
-        return '/admin'
+        return adminUrl
       }
 
       try {
         if (url.startsWith('/')) {
-          if (url === '/dashboard') {
-            return '/admin'
+          const target = new URL(url, safeBase)
+          if (target.pathname === '/dashboard') {
+            target.pathname = '/admin'
+            target.search = ''
+            target.hash = ''
           }
-          return url
+          return target.toString()
         }
 
         const target = new URL(url)
-        if (target.pathname === '/dashboard' && target.origin === safeBase.origin) {
-          return '/admin'
-        }
         if (target.origin === safeBase.origin) {
-          return target.pathname + target.search + target.hash
+          if (target.pathname === '/dashboard') {
+            target.pathname = '/admin'
+            target.search = ''
+            target.hash = ''
+            return target.toString()
+          }
+          return target.toString()
         }
       } catch {
         try {
           const normalized = new URL(url.replace(/^\/+/, '/'), safeBase)
           if (normalized.pathname === '/dashboard') {
-            return '/admin'
+            normalized.pathname = '/admin'
+            normalized.search = ''
+            normalized.hash = ''
           }
-          return normalized.pathname + normalized.search + normalized.hash
+          return normalized.toString()
         } catch {
-          return '/admin'
+          return adminUrl
         }
       }
 

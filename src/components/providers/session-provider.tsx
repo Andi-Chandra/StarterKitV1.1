@@ -19,17 +19,16 @@ export default function NextAuthProvider({ children }: { children: React.ReactNo
     try {
       if (typeof window === 'undefined') return
       const globalAny = window as any
-      const origin = window.location.origin
+      const currentOrigin = window.location.origin
       if (!globalAny.__NEXTAUTH) {
-        globalAny.__NEXTAUTH = { baseUrl: origin, basePath: '/api/auth' }
+        globalAny.__NEXTAUTH = { baseUrl: currentOrigin, basePath: '/api/auth' }
         return
       }
       const cfg = globalAny.__NEXTAUTH
-      const origin = window.location.origin
       const hasProtocol = (u?: string) => !!u && /^https?:\/\//i.test(u)
       // If baseUrl is missing or invalid, normalize it to the current origin
       if (!hasProtocol(cfg.baseUrl)) {
-        cfg.baseUrl = origin
+        cfg.baseUrl = currentOrigin
       }
       // Ensure basePath is set
       if (!cfg.basePath) {

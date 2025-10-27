@@ -57,6 +57,20 @@ export function VideoSlider({
   
   const videoRefs = useRef<{ [key: string]: HTMLVideoElement }>({})
 
+  const inferMimeType = useCallback((url: string): string => {
+    try {
+      const cleanUrl = url.split('?')[0]
+      const ext = cleanUrl.split('.').pop()?.toLowerCase()
+      if (!ext) return 'video/mp4'
+      if (ext === 'webm') return 'video/webm'
+      if (ext === 'ogg' || ext === 'ogv') return 'video/ogg'
+      if (ext === 'm3u8') return 'application/x-mpegURL'
+      return 'video/mp4'
+    } catch {
+      return 'video/mp4'
+    }
+  }, [])
+
   const onSelect = useCallback(() => {
     if (!emblaApi) return
     setSelectedIndex(emblaApi.selectedScrollSnap())
@@ -200,15 +214,29 @@ export function VideoSlider({
                       ref={(el) => {
                         if (el) videoRefs.current[video.id] = el
                       }}
-                      src={video.videoUrl}
-                      poster={video.thumbnailUrl}
                       className="w-full h-full object-contain object-center"
+                      preload="metadata"
+                      playsInline
+                      controls={false}
+                      crossOrigin="anonymous"
+                      muted={isMuted[video.id] ?? true}
+                      poster={video.thumbnailUrl}
                       onTimeUpdate={() => handleTimeUpdate(video.id)}
                       onLoadedMetadata={() => handleLoadedMetadata(video.id)}
-                      playsInline
-                      muted={isMuted[video.id] ?? true}
-                      onEnded={() => setIsPlaying(prev => ({ ...prev, [video.id]: false }))}
-                    />
+                      onEnded={() => {
+                        const element = videoRefs.current[video.id]
+                        if (element) {
+                          element.currentTime = 0
+                          element.pause()
+                        }
+                        setIsPlaying(prev => ({ ...prev, [video.id]: false }))
+                        setProgress(prev => ({ ...prev, [video.id]: 0 }))
+                        setCurrentTime(prev => ({ ...prev, [video.id]: 0 }))
+                      }}
+                    >
+                      <source src={video.videoUrl} type={inferMimeType(video.videoUrl)} />
+                      Your browser does not support the video tag.
+                    </video>
                     
                     {/* Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent pointer-events-none" />
@@ -245,7 +273,7 @@ export function VideoSlider({
                       type="button"
                       onClick={() => togglePlayPause(video.id)}
                       className={cn(
-                        "absolute inset-0 flex flex-col items-center justify-center gap-4 transition-opacity duration-300 focus:outline-none",
+                        "absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 transition-opacity duration-300 focus:outline-none",
                         isPlaying[video.id] ? "opacity-0 pointer-events-none" : "opacity-100 pointer-events-auto"
                       )}
                     >

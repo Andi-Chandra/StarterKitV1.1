@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState, useRef } from 'react'
 import useEmblaCarousel from 'embla-carousel-react'
-import { ChevronLeft, ChevronRight, Play, Pause, Volume2, VolumeX, Maximize } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Play, Pause, Volume2, VolumeX, Maximize, RefreshCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -94,7 +94,12 @@ export function VideoSlider({
     if (!video) return
 
     if (video.paused) {
-      video.play()
+      const attempt = video.play()
+      if (attempt && typeof (attempt as Promise<void>).catch === 'function') {
+        (attempt as Promise<void>).catch(() => {
+          setIsPlaying(prev => ({ ...prev, [videoId]: false }))
+        })
+      }
       setIsPlaying(prev => ({ ...prev, [videoId]: true }))
     } else {
       video.pause()
@@ -201,7 +206,8 @@ export function VideoSlider({
                       onTimeUpdate={() => handleTimeUpdate(video.id)}
                       onLoadedMetadata={() => handleLoadedMetadata(video.id)}
                       playsInline
-                      muted={isMuted[video.id] || false}
+                      muted={isMuted[video.id] ?? true}
+                      onEnded={() => setIsPlaying(prev => ({ ...prev, [video.id]: false }))}
                     />
                     
                     {/* Overlay */}
@@ -233,6 +239,24 @@ export function VideoSlider({
                         </div>
                       </div>
                     </div>
+
+                    {/* Tap-to-play overlay */}
+                    <button
+                      type="button"
+                      onClick={() => togglePlayPause(video.id)}
+                      className={cn(
+                        "absolute inset-0 flex flex-col items-center justify-center gap-4 transition-opacity duration-300 focus:outline-none",
+                        isPlaying[video.id] ? "opacity-0 pointer-events-none" : "opacity-100 pointer-events-auto"
+                      )}
+                    >
+                      <span className="flex items-center gap-3 rounded-full bg-white/90 px-5 py-2 text-sm font-semibold text-black shadow-lg">
+                        <Play className="h-4 w-4" />
+                        Play video
+                      </span>
+                      {!video.thumbnailUrl && (
+                        <span className="text-xs text-white/80">Tap to start playback</span>
+                      )}
+                    </button>
 
                     {/* Video Controls */}
                     {showControls && (
@@ -329,11 +353,12 @@ export function VideoSlider({
         size="icon"
         className="absolute bottom-4 left-4 bg-background/80 hover:bg-background border-white/20"
         onClick={toggleAutoPlay}
+        title={isAutoPlaying ? 'Pause auto-play' : 'Enable auto-play'}
       >
         {isAutoPlaying ? (
           <Pause className="h-4 w-4" />
         ) : (
-          <Play className="h-4 w-4" />
+          <RefreshCcw className="h-4 w-4" />
         )}
       </Button>
 

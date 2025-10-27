@@ -144,13 +144,13 @@ export default function Home() {
         {imageSlides.length > 0 && (
           <section className="border-b border-border/60 bg-background py-16">
             <div className="container space-y-10">
-              <div className="mx-auto flex w-full max-w-4xl flex-col gap-3 text-center">
+              {/* <div className="mx-auto flex w-full max-w-4xl flex-col gap-3 text-center">
                 <Badge className="mx-auto w-fit bg-primary/10 text-primary">Featured moments</Badge>
                 <h2 className="text-3xl font-bold">Stories from the harbour</h2>
                 <p className="text-muted-foreground">
                   A rotating look at the latest imagery from operations, communities, and special initiatives.
                 </p>
-              </div>
+              </div> */}
               <ImageSlider
                 slides={imageSlides}
                 autoPlay

@@ -202,8 +202,10 @@ export function Gallery({
                   <CardContent className={cn("p-0", viewMode === 'list' && "flex-shrink-0 w-full sm:w-48")}>
                     {/* Media Thumbnail */}
                     <div className={cn(
-                      "relative bg-muted",
-                      viewMode === 'grid' ? "aspect-square" : "aspect-video sm:aspect-square"
+                      "relative bg-muted overflow-hidden rounded-t-md",
+                      viewMode === 'grid'
+                        ? "aspect-[4/3]"
+                        : "aspect-video sm:aspect-[4/3]"
                     )}>
                       {item.fileType === 'IMAGE' ? (
                         <ImageWithFallback

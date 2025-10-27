@@ -152,10 +152,26 @@ export async function GET(request: NextRequest) {
       skip,
       take: limit
     })
-    const mediaItems = mediaItemsRaw.map((item) => ({
-      ...item,
-      fileType: item.fileType?.toUpperCase?.() ?? item.fileType,
-    }))
+    const mediaItems = mediaItemsRaw.map((item) => {
+      const fileType = item.fileType?.toUpperCase?.() ?? item.fileType
+      let fileUrl = item.fileUrl
+      if (fileType === 'VIDEO' && typeof fileUrl === 'string') {
+        try {
+          const parsed = new URL(fileUrl)
+          parsed.searchParams.delete('width')
+          parsed.searchParams.delete('height')
+          parsed.searchParams.delete('resize')
+          fileUrl = parsed.toString()
+        } catch {
+          // ignore malformed URLs
+        }
+      }
+      return {
+        ...item,
+        fileType,
+        fileUrl,
+      }
+    })
 
     // Also return categories for convenience (used by some hooks)
     const categories = await db.mediaCategory.findMany({

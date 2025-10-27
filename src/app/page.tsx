@@ -11,10 +11,12 @@ import { Button } from '@/components/ui/button'
 import { useSession } from '@/components/providers/session-provider'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Play, ArrowRight, Star, Users, Zap } from 'lucide-react'
+import { Play, ArrowRight, Star, Users, Zap, Video } from 'lucide-react'
 import { useMedia } from '@/hooks/useMedia'
 import { transformImageSliders, transformVideoSliders } from '@/lib/dataTransform'
 import { Skeleton } from '@/components/ui/skeleton'
+import { cn } from '@/lib/utils'
+import { ImageWithFallback } from '@/components/ui/ImageWithFallback'
 
 function LoadingSkeleton() {
   return (
@@ -110,6 +112,28 @@ export default function Home() {
   // Transform data for components
   const imageSlides = transformImageSliders(sliders)
   const videoSlides = transformVideoSliders(sliders)
+  const heroSlide = imageSlides[0]
+  const secondarySlides = imageSlides.slice(1)
+
+  const highlights = [
+    {
+      title: 'Curated Experiences',
+      description: 'Immersive showcases designed to tell stories that matter.',
+      icon: Star,
+    },
+    {
+      title: 'Community First',
+      description: 'Resources built with the people we serve at the heart of every feature.',
+      icon: Users,
+    },
+    {
+      title: 'Rapid Innovation',
+      description: 'Always evolving with modern tooling, real-time content, and fresh insights.',
+      icon: Zap,
+    },
+  ]
+
+  const latestMedia = mediaItems.slice(0, 3)
 
   return (
     <div className="min-h-screen bg-background">
@@ -117,17 +141,101 @@ export default function Home() {
       <Header navigationLinks={navigationLinks} />
 
       {/* Main Content */}
-      <main id="main">
-        {/* Hero Image Slider */}
-        <section>
-          <ImageSlider 
-            slides={imageSlides}
-            autoPlay={true}
-            autoPlayInterval={5000}
-            showArrows={true}
-            showDots={true}
-          />
+      <main id="main" className="relative">
+        {/* Hero */}
+        <section className="relative overflow-hidden">
+          <div
+            className={cn(
+              'relative isolate flex min-h-[520px] flex-col justify-center px-6 py-20 text-white',
+              heroSlide ? 'bg-cover bg-center' : 'bg-gradient-to-br from-primary via-primary/60 to-background'
+            )}
+            style={
+              heroSlide
+                ? {
+                    backgroundImage: `linear-gradient(to right, rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.4)), url('${heroSlide.imageUrl}')`,
+                  }
+                : undefined
+            }
+          >
+            <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(148,163,184,0.25),_transparent_65%)]" />
+            <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 text-left">
+              <Badge className="w-fit bg-white/20 text-white backdrop-blur">PPS Belawan</Badge>
+              <div className="space-y-4">
+                <h1 className="text-3xl font-semibold leading-tight md:text-5xl">
+                  {heroSlide?.title ?? 'Showcasing maritime excellence with modern storytelling'}
+                </h1>
+                <p className="max-w-2xl text-base text-white/80 md:text-lg">
+                  {heroSlide?.subtitle ??
+                    'Explore initiatives, insights, and visual stories that capture the energy of Pelabuhan Perikanan Samudera Belawan.'}
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-3">
+                <Button asChild size="lg" variant="secondary" className="gap-2">
+                  <Link href="#gallery">
+                    <ArrowRight className="h-4 w-4" />
+                    Explore Gallery
+                  </Link>
+                </Button>
+                <Button variant="ghost" size="lg" asChild className="gap-2 text-white hover:bg-white/10">
+                  <Link href="#videos">
+                    <Play className="h-4 w-4" />
+                    Watch Highlights
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+          {secondarySlides.length > 0 && (
+            <div className="relative border-b border-border/60 bg-background py-12">
+              <div className="mx-auto flex w-full max-w-6xl flex-col gap-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-semibold">In the Spotlight</h2>
+                  <Badge variant="outline" className="bg-background/80">
+                    Auto-rotating every 5s
+                  </Badge>
+                </div>
+                <ImageSlider
+                  slides={secondarySlides}
+                  autoPlay
+                  autoPlayInterval={5000}
+                  showArrows
+                  showDots
+                />
+              </div>
+            </div>
+          )}
         </section>
+
+        {/* Highlights Section */}
+        <section className="border-b border-border/60 bg-muted/40 py-16">
+          <div className="container">
+            <div className="mx-auto max-w-4xl text-center">
+              <Badge className="mx-auto mb-4 w-fit bg-primary/10 text-primary">Why it matters</Badge>
+              <h2 className="text-3xl font-bold">Serving Belawan with clarity and momentum</h2>
+              <p className="mt-3 text-muted-foreground">
+                We combine storytelling, data, and modern design to highlight the mission of PPS Belawan and the
+                communities it supports.
+              </p>
+            </div>
+
+            <div className="mt-10 grid gap-6 md:grid-cols-3">
+              {highlights.map((highlight) => (
+                <Card key={highlight.title} className="border border-border/60 shadow-sm transition hover:border-primary/40">
+                  <CardHeader className="flex flex-row items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+                      <highlight.icon className="h-5 w-5" />
+                    </div>
+                    <CardTitle className="text-lg">{highlight.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription className="text-sm text-muted-foreground">{highlight.description}</CardDescription>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* Video Slider Section */}
         {videoSlides.length > 0 && (
           <section id="videos" className="py-20 bg-muted/50">
@@ -174,7 +282,88 @@ export default function Home() {
           </section>
         )}
 
-        
+        {/* Latest Media Section */}
+        {latestMedia.length > 0 && (
+          <section className="border-t border-border/60 bg-muted/30 py-20">
+            <div className="container">
+              <div className="mx-auto mb-10 flex w-full max-w-4xl flex-col gap-3 text-center">
+                <Badge className="mx-auto w-fit bg-primary/10 text-primary">Fresh from the library</Badge>
+                <h2 className="text-3xl font-bold">Recently Added Highlights</h2>
+                <p className="text-muted-foreground">
+                  The newest imagery and clips added to the archive—curated for press, stakeholders, and the public.
+                </p>
+              </div>
+
+              <div className="grid gap-6 md:grid-cols-3">
+                {latestMedia.map((item) => (
+                  <Card key={item.id} className="h-full overflow-hidden border border-border/60 shadow-sm">
+                    <div className="relative aspect-[4/3] bg-muted">
+                      {item.fileType === 'IMAGE' ? (
+                        <ImageWithFallback src={item.fileUrl} alt={item.title} fill className="object-cover" />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-muted">
+                          <Video className="h-8 w-8 text-muted-foreground" />
+                        </div>
+                      )}
+                      <Badge className="absolute top-3 left-3 bg-primary text-primary-foreground">
+                        {item.fileType === 'IMAGE' ? 'Image' : 'Video'}
+                      </Badge>
+                    </div>
+                    <CardHeader className="space-y-2">
+                      <CardTitle className="text-lg line-clamp-1">{item.title}</CardTitle>
+                      {item.category && (
+                        <Badge variant="outline" className="w-fit text-xs">
+                          {item.category.name}
+                        </Badge>
+                      )}
+                    </CardHeader>
+                    <CardContent>
+                      {item.description ? (
+                        <p className="text-sm text-muted-foreground line-clamp-3">{item.description}</p>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">Added on {new Date(item.createdAt).toLocaleDateString()}</p>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              <div className="mt-12 flex justify-center">
+                <Button asChild size="lg" variant="outline" className="gap-2">
+                  <Link href="#gallery">
+                    Browse the full library
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* CTA */}
+        <section className="relative overflow-hidden border-y border-border/60 bg-gradient-to-br from-primary/10 via-background to-background">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.2),_transparent_60%)]" />
+          <div className="container relative py-16">
+            <div className="mx-auto flex max-w-4xl flex-col gap-6 text-center">
+              <Badge className="mx-auto w-fit bg-primary text-primary-foreground">Get involved</Badge>
+              <h2 className="text-3xl font-bold">Partner with PPS Belawan</h2>
+              <p className="text-muted-foreground">
+                Collaborate on new initiatives, share insights, or request access to tailored media kits. We’re here to amplify the work happening across Belawan.
+              </p>
+              <div className="flex flex-wrap justify-center gap-4">
+                <Button asChild size="lg" className="gap-2">
+                  <Link href="/contact">
+                    Talk to our team
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button variant="outline" size="lg" asChild>
+                  <Link href="#videos">View impact stories</Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
 
       {/* Footer */}

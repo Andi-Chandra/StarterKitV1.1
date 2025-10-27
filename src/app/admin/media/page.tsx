@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { 
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -16,21 +16,19 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { ImageWithFallback } from '@/components/ui/ImageWithFallback'
-import { 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Search, 
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Search,
   Filter,
   Image as ImageIcon,
   Video,
-  Eye,
   Grid,
-  List
+  List,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-// Force dynamic rendering
 export const dynamic = 'force-dynamic'
 
 interface MediaItem {
@@ -52,7 +50,7 @@ export default function AdminMediaPage() {
   const { status } = useSession()
   const { accessToken } = useAuth()
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([])
-  const [categories, setCategories] = useState([])
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
@@ -64,7 +62,6 @@ export default function AdminMediaPage() {
       return
     }
     if (status === 'authenticated') {
-      // Fetch media items and categories
       fetchMediaItems()
       fetchCategories()
     }
@@ -112,7 +109,7 @@ export default function AdminMediaPage() {
       })
 
       if (response.ok) {
-        setMediaItems(prev => prev.filter(item => item.id !== id))
+        setMediaItems((prev) => prev.filter((item) => item.id !== id))
       } else {
         alert('Failed to delete media item')
       }
@@ -122,9 +119,10 @@ export default function AdminMediaPage() {
     }
   }
 
-  const filteredItems = mediaItems.filter(item => {
-    const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         item.description?.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredItems = mediaItems.filter((item) => {
+    const matchesSearch =
+      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.description?.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesCategory = selectedCategory === 'all' || item.category?.id === selectedCategory
     return matchesSearch && matchesCategory
   })
@@ -132,10 +130,10 @@ export default function AdminMediaPage() {
   if (isLoading) {
     return (
       <div className="min-h-[50vh] bg-background">
-        <div className="container py-8">
+        <div className="flex items-center justify-center py-12">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-            <p>Loading media items...</p>
+            <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
+            <p>Loading media library...</p>
           </div>
         </div>
       </div>
@@ -143,185 +141,196 @@ export default function AdminMediaPage() {
   }
 
   return (
-    <div className="min-h-[50vh] bg-background">
-      <div className="container py-8">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Media Management</h1>
-            <p className="text-muted-foreground">Manage your images and videos</p>
+    <div className="space-y-8">
+      <Card className="relative overflow-hidden border-none bg-gradient-to-br from-primary/15 via-primary/10 to-transparent shadow-sm">
+        <div className="absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(circle_at_top,_theme(colors.primary/20),_transparent_70%)]" />
+        <CardHeader className="relative flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="space-y-2">
+            <Badge className="w-fit bg-primary/20 text-primary">Library</Badge>
+            <CardTitle className="text-2xl font-semibold md:text-3xl">Media Library</CardTitle>
+            <CardDescription className="max-w-2xl text-base text-muted-foreground">
+              Manage images and videos that power sliders, gallery sections, and featured layouts throughout the site.
+            </CardDescription>
           </div>
-          <Button asChild>
+          <Button asChild size="lg" className="shadow-md">
             <Link href="/admin/media/new">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Media
+              <Plus className="mr-2 h-4 w-4" /> Add Media
             </Link>
           </Button>
-        </div>
+        </CardHeader>
+      </Card>
 
-        {/* Filters */}
-        <Card className="mb-6">
-          <CardContent className="p-6">
-            <div className="flex flex-col lg:flex-row gap-4">
-              <div className="flex-1">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search media..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
-                  />
+      <Card className="border border-border/60 shadow-sm">
+        <CardHeader className="gap-4">
+          <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+            <div className="grid gap-3 sm:grid-cols-2 sm:items-center">
+              <div className="flex items-center gap-3 rounded-xl border border-dashed border-border/60 bg-background/80 px-4 py-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <ImageIcon className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">Total assets</p>
+                  <p className="text-sm font-medium text-foreground">{mediaItems.length}</p>
                 </div>
               </div>
-              <div className="flex gap-2">
-                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                  <SelectTrigger className="w-[200px]">
-                    <SelectValue placeholder="All Categories" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
-                    {categories.map((category: any) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <div className="flex border rounded-md">
-                  <Button
-                    variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setViewMode('grid')}
-                    className="rounded-r-none"
-                  >
-                    <Grid className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant={viewMode === 'list' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setViewMode('list')}
-                    className="rounded-l-none"
-                  >
-                    <List className="h-4 w-4" />
-                  </Button>
+              <div className="flex items-center gap-3 rounded-xl border border-dashed border-border/60 bg-background/80 px-4 py-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <Filter className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">Categories</p>
+                  <p className="text-sm font-medium text-foreground">{categories.length}</p>
                 </div>
               </div>
             </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="relative w-full min-w-[220px] flex-1">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Search media..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Filter by category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All categories</SelectItem>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div className="flex rounded-md border border-border/60">
+                <Button
+                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('grid')}
+                  className="rounded-r-none"
+                >
+                  <Grid className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  className="rounded-l-none"
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+          <CardDescription>
+            Optimise your media workflow by filtering, reviewing, and updating assets before they go live.
+          </CardDescription>
+        </CardHeader>
+      </Card>
+
+      <div>
+        <p className="text-sm text-muted-foreground">
+          Showing {filteredItems.length} {filteredItems.length === 1 ? 'asset' : 'assets'}{' '}
+          {selectedCategory !== 'all' ? 'in selected category' : ''}
+        </p>
+      </div>
+
+      {filteredItems.length === 0 ? (
+        <Card className="border border-dashed border-border/60 bg-background/80 shadow-sm">
+          <CardContent className="flex flex-col items-center gap-4 py-12 text-center">
+            <ImageIcon className="h-12 w-12 text-muted-foreground" />
+            <div>
+              <h3 className="text-lg font-semibold">No media items found</h3>
+              <p className="text-muted-foreground">
+                {searchQuery || selectedCategory !== 'all'
+                  ? 'Try adjusting your filters.'
+                  : 'Get started by adding your first media item.'}
+              </p>
+            </div>
+            <Button asChild>
+              <Link href="/admin/media/new">
+                <Plus className="mr-2 h-4 w-4" />
+                Add Media
+              </Link>
+            </Button>
           </CardContent>
         </Card>
-
-        {/* Results Count */}
-        <div className="mb-4">
-          <p className="text-sm text-muted-foreground">
-            {filteredItems.length} {filteredItems.length === 1 ? 'item' : 'items'} found
-          </p>
-        </div>
-
-        {/* Media Grid/List */}
-        {filteredItems.length === 0 ? (
-          <Card>
-            <CardContent className="p-12 text-center">
-              <ImageIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">No media items found</h3>
-              <p className="text-muted-foreground mb-4">
-                {searchQuery || selectedCategory !== 'all' 
-                  ? 'Try adjusting your filters' 
-                  : 'Get started by adding your first media item'
-                }
-              </p>
-              <Button asChild>
-                <Link href="/admin/media/new">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Media
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className={cn(
+      ) : (
+        <div
+          className={cn(
             viewMode === 'grid'
-              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-              : "space-y-4"
-          )}>
-            {filteredItems.map((item) => (
-              <Card key={item.id} className={cn(
-                "overflow-hidden group hover:shadow-lg transition-shadow",
-                viewMode === 'list' && "flex"
-              )}>
-                <div className={cn(
-                  "relative bg-muted",
-                  viewMode === 'grid' ? "aspect-square" : "w-48 aspect-[3/2] flex-shrink-0"
-                )}>
-                  {item.fileType === 'IMAGE' ? (
-                    <ImageWithFallback
-                      src={item.fileUrl}
-                      alt={item.title}
-                      fill
-                      className="object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Video className="h-8 w-8 text-muted-foreground" />
-                    </div>
-                  )}
-                  
-                  {/* Overlay Actions */}
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                    <Button size="sm" variant="secondary" asChild>
-                      <Link href={`/admin/media/${item.id}/edit`}>
-                        <Edit className="h-4 w-4" />
-                      </Link>
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="destructive"
-                      onClick={() => handleDelete(item.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+              ? 'grid gap-6 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4'
+              : 'space-y-4'
+          )}
+        >
+          {filteredItems.map((item) => (
+            <Card
+              key={item.id}
+              className={cn(
+                'overflow-hidden border border-border/60 shadow-sm transition hover:border-primary/40',
+                viewMode === 'list' && 'flex'
+              )}
+            >
+              <div
+                className={cn(
+                  'relative bg-muted',
+                  viewMode === 'grid' ? 'aspect-square' : 'w-48 flex-shrink-0',
+                  viewMode === 'list' ? 'aspect-[3/2]' : ''
+                )}
+              >
+                {item.fileType === 'IMAGE' ? (
+                  <ImageWithFallback src={item.fileUrl} alt={item.title} fill className="object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center">
+                    <Video className="h-8 w-8 text-muted-foreground" />
                   </div>
+                )}
 
-                  {/* Featured Badge */}
-                  {item.isFeatured && (
-                    <Badge className="absolute top-2 right-2">
-                      Featured
-                    </Badge>
-                  )}
+                <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/60 opacity-0 transition-opacity group-hover:opacity-100">
+                  <Button size="sm" variant="secondary" asChild>
+                    <Link href={`/admin/media/${item.id}/edit`}>
+                      <Edit className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                  <Button size="sm" variant="destructive" onClick={() => handleDelete(item.id)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
 
-                <CardContent className={cn(
-                  "p-4",
-                  viewMode === 'list' && "flex-1"
-                )}>
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-semibold line-clamp-1">{item.title}</h3>
-                    {item.fileType === 'VIDEO' && (
-                      <Video className="h-4 w-4 text-muted-foreground flex-shrink-0 ml-2" />
-                    )}
-                  </div>
-                  
-                  {item.description && (
-                    <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-                      {item.description}
-                    </p>
+                {item.isFeatured && (
+                  <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground">Featured</Badge>
+                )}
+              </div>
+
+              <CardContent className={cn('p-4', viewMode === 'list' && 'flex-1')}>
+                <div className="mb-2 flex items-start justify-between">
+                  <h3 className="font-semibold line-clamp-1">{item.title}</h3>
+                  {item.fileType === 'VIDEO' && (
+                    <Video className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                   )}
-                  
-                  <div className="flex items-center justify-between">
-                    {item.category && (
-                      <Badge variant="outline" className="text-xs">
-                        {item.category.name}
-                      </Badge>
-                    )}
-                    <span className="text-xs text-muted-foreground">
-                      {new Date(item.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
+                </div>
+                {item.description && (
+                  <p className="mb-2 text-sm text-muted-foreground line-clamp-2">{item.description}</p>
+                )}
+                <div className="flex items-center justify-between">
+                  {item.category && (
+                    <Badge variant="outline" className="text-xs">
+                      {item.category.name}
+                    </Badge>
+                  )}
+                  <span className="text-xs text-muted-foreground">
+                    {new Date(item.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

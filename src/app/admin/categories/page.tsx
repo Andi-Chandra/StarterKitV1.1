@@ -7,12 +7,14 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { 
-  Plus, 
-  Edit, 
-  Trash2, 
+import { Badge } from '@/components/ui/badge'
+import {
+  Plus,
+  Edit,
+  Trash2,
   Search,
-  FolderOpen
+  FolderOpen,
+  Sparkles,
 } from 'lucide-react'
 
 interface Category {
@@ -101,26 +103,40 @@ export default function AdminCategoriesPage() {
   }
 
   return (
-    <div className="min-h-[50vh] bg-background">
-      <div className="container py-8">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Category Management</h1>
-            <p className="text-muted-foreground">Manage your content categories</p>
+    <div className="space-y-8">
+      <Card className="relative overflow-hidden border-none bg-gradient-to-br from-primary/15 via-primary/10 to-transparent shadow-sm">
+        <div className="absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(circle_at_top,_theme(colors.primary/20),_transparent_70%)]" />
+        <CardHeader className="relative flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="space-y-2">
+            <Badge className="w-fit bg-primary/20 text-primary">Collections</Badge>
+            <CardTitle className="text-2xl font-semibold md:text-3xl">Category Management</CardTitle>
+            <CardDescription className="max-w-2xl text-base text-muted-foreground">
+              Keep your media organised with curated categories. Search, refine, and update without losing context.
+            </CardDescription>
           </div>
-          <Button asChild>
+          <Button asChild size="lg" className="shadow-md">
             <Link href="/admin/categories/new">
-              <Plus className="h-4 w-4 mr-2" />
+              <Sparkles className="mr-2 h-4 w-4" />
               Add Category
             </Link>
           </Button>
-        </div>
+        </CardHeader>
+      </Card>
 
-        {/* Search */}
-        <Card className="mb-6">
-          <CardContent className="p-6">
-            <div className="relative max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+      <Card className="border border-border/60 shadow-sm">
+        <CardHeader className="gap-6">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center gap-3 rounded-xl border border-dashed border-border/60 bg-background/80 px-4 py-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <FolderOpen className="h-4 w-4" />
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Categories</p>
+                <p className="text-sm font-medium text-foreground">{categories.length} total</p>
+              </div>
+            </div>
+            <div className="relative w-full max-w-md">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Search categories..."
                 value={searchQuery}
@@ -128,74 +144,72 @@ export default function AdminCategoriesPage() {
                 className="pl-10"
               />
             </div>
+          </div>
+          <CardDescription>
+            Use categories to power navigation, sliders, and curated collections across the site.
+          </CardDescription>
+        </CardHeader>
+      </Card>
+
+      {filteredCategories.length === 0 ? (
+        <Card className="border border-dashed border-border/60 bg-background/80 shadow-sm">
+          <CardContent className="flex flex-col items-center gap-4 py-12 text-center">
+            <FolderOpen className="h-12 w-12 text-muted-foreground" />
+            <div>
+              <h3 className="text-lg font-semibold">No categories found</h3>
+              <p className="text-muted-foreground">
+                {searchQuery ? 'Try adjusting your search terms.' : 'Get started by creating your first category.'}
+              </p>
+            </div>
+            <Button asChild>
+              <Link href="/admin/categories/new">
+                <Plus className="mr-2 h-4 w-4" />
+                Add Category
+              </Link>
+            </Button>
           </CardContent>
         </Card>
-
-        {/* Categories Grid */}
-        {filteredCategories.length === 0 ? (
-          <Card>
-            <CardContent className="p-12 text-center">
-              <FolderOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">No categories found</h3>
-              <p className="text-muted-foreground mb-4">
-                {searchQuery ? 'Try adjusting your search' : 'Get started by creating your first category'}
-              </p>
-              <Button asChild>
-                <Link href="/admin/categories/new">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Category
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredCategories.map((category) => (
-              <Card key={category.id} className="group hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-primary/10 rounded-lg">
-                        <FolderOpen className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-lg">{category.name}</CardTitle>
-                        <p className="text-sm text-muted-foreground">/{category.slug}</p>
-                      </div>
+      ) : (
+        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+          {filteredCategories.map((category) => (
+            <Card key={category.id} className="group border border-border/60 shadow-sm transition hover:border-primary/40">
+              <CardHeader>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+                      <FolderOpen className="h-4 w-4" />
                     </div>
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button size="sm" variant="ghost" asChild>
-                        <Link href={`/admin/categories/${category.id}/edit`}>
-                          <Edit className="h-4 w-4" />
-                        </Link>
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="ghost"
-                        onClick={() => handleDelete(category.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                    <div>
+                      <CardTitle className="text-lg">{category.name}</CardTitle>
+                      <p className="text-sm text-muted-foreground">/{category.slug}</p>
                     </div>
                   </div>
-                </CardHeader>
-                {category.description && (
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground line-clamp-3">
-                      {category.description}
-                    </p>
-                  </CardContent>
-                )}
-                <CardContent className="pt-0">
-                  <p className="text-xs text-muted-foreground">
-                    Created {new Date(category.createdAt).toLocaleDateString()}
-                  </p>
+                  <div className="flex items-center gap-1 opacity-0 transition group-hover:opacity-100">
+                    <Button size="sm" variant="ghost" asChild>
+                      <Link href={`/admin/categories/${category.id}/edit`}>
+                        <Edit className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => handleDelete(category.id)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              {category.description && (
+                <CardContent>
+                  <p className="text-sm text-muted-foreground line-clamp-3">{category.description}</p>
                 </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
+              )}
+              <CardContent className="pt-0">
+                <p className="text-xs text-muted-foreground">
+                  Created {new Date(category.createdAt).toLocaleDateString()}
+                </p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

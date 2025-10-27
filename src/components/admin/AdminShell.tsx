@@ -19,8 +19,9 @@ import {
   SidebarSeparator,
   SidebarTrigger,
 } from '@/components/ui/sidebar'
-import { LayoutDashboard, Image, Folder, Settings, LogOut } from 'lucide-react'
+import { LayoutDashboard, Image, Folder, Settings, LogOut, PanelsTopLeft } from 'lucide-react'
 import { useAuth, useSession } from '@/components/providers/session-provider'
+import { cn } from '@/lib/utils'
 
 type AdminShellProps = {
   children: React.ReactNode
@@ -32,6 +33,15 @@ export default function AdminShell({ children }: AdminShellProps) {
   const { signOut } = useAuth()
   const pathname = usePathname()
 
+  const navigation = [
+    { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/admin/media', label: 'Media', icon: Image },
+    { href: '/admin/categories', label: 'Categories', icon: Folder },
+    { href: '/admin/sliders', label: 'Sliders', icon: Image },
+  ] as const
+
+  const secondary = [{ href: '/admin/settings', label: 'Settings', icon: Settings }] as const
+
   const isActive = (href: string) => pathname === href
   const handleSignOut = async () => {
     const result = await signOut()
@@ -40,99 +50,124 @@ export default function AdminShell({ children }: AdminShellProps) {
     }
   }
 
+  const currentNav = [...navigation, ...secondary].find((item) => isActive(item.href))
+
   return (
     <SidebarProvider>
-      <div className="min-h-screen bg-background flex">
-        <Sidebar>
-          <SidebarHeader>
-            <div className="px-2 py-2 text-sm font-semibold">Admin</div>
-          </SidebarHeader>
-          <SidebarContent>
-            <SidebarGroup>
-              <SidebarGroupLabel>Navigation</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={isActive('/admin')}>
-                      <Link href="/admin">
-                        <LayoutDashboard className="h-4 w-4" />
-                        <span>Dashboard</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={isActive('/admin/media')}>
-                      <Link href="/admin/media">
-                        <Image className="h-4 w-4" />
-                        <span>Media</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={isActive('/admin/categories')}>
-                      <Link href="/admin/categories">
-                        <Folder className="h-4 w-4" />
-                        <span>Categories</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={isActive('/admin/sliders')}>
-                      <Link href="/admin/sliders">
-                        <Image className="h-4 w-4" />
-                        <span>Sliders</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-            <SidebarSeparator />
-            <SidebarGroup>
-              <SidebarGroupLabel>Settings</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={isActive('/admin/settings')}>
-                      <Link href="/admin/settings">
-                        <Settings className="h-4 w-4" />
-                        <span>Settings</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </SidebarContent>
-          <SidebarFooter>
-            {session?.user?.email && (
-              <div className="text-xs text-muted-foreground px-2 py-1 truncate">
-                {session.user.email}
-              </div>
-            )}
-            <div className="px-2 py-1">
-              <Button size="sm" variant="outline" className="w-full" onClick={handleSignOut}>
-                <LogOut className="h-4 w-4 mr-2" /> Sign Out
-              </Button>
-            </div>
-          </SidebarFooter>
-        </Sidebar>
-        <SidebarInset>
-          {/* Top bar */}
-          <div className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b bg-background px-4 md:px-6 shadow-sm">
-            <SidebarTrigger />
-            <div className="font-medium">Admin</div>
-            <div className="ml-auto flex items-center gap-2">
-              {session?.user?.email && (
-                <span className="hidden text-sm text-muted-foreground md:inline">
-                  {session.user.email}
+      <div className="relative min-h-screen bg-muted/60">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_theme(colors.primary/10),_transparent_60%)]" />
+        <div className="relative z-10 flex min-h-screen">
+          <Sidebar className="border-r/0 bg-card/80 backdrop-blur">
+            <SidebarHeader>
+              <div className="flex items-center gap-2 px-2 py-3 text-sm font-semibold tracking-wide">
+                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <PanelsTopLeft className="h-4 w-4" />
                 </span>
-              )}
+                Control Center
+              </div>
+            </SidebarHeader>
+            <SidebarContent>
+              <SidebarGroup>
+                <SidebarGroupLabel>Main</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {navigation.map((item) => (
+                      <SidebarMenuItem key={item.href}>
+                        <SidebarMenuButton
+                          asChild
+                          isActive={isActive(item.href)}
+                          className={cn(
+                            'rounded-md transition-colors',
+                            isActive(item.href)
+                              ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                              : 'hover:bg-muted'
+                          )}
+                        >
+                          <Link href={item.href}>
+                            <item.icon className="h-4 w-4" />
+                            <span>{item.label}</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+              <SidebarSeparator />
+              <SidebarGroup>
+                <SidebarGroupLabel>System</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {secondary.map((item) => (
+                      <SidebarMenuItem key={item.href}>
+                        <SidebarMenuButton
+                          asChild
+                          isActive={isActive(item.href)}
+                          className={cn(
+                            'rounded-md transition-colors',
+                            isActive(item.href)
+                              ? 'bg-primary/10 text-primary hover:bg-primary/20'
+                              : 'hover:bg-muted'
+                          )}
+                        >
+                          <Link href={item.href}>
+                            <item.icon className="h-4 w-4" />
+                            <span>{item.label}</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            </SidebarContent>
+            <SidebarFooter className="border-t bg-muted/40">
+              <div className="space-y-2 px-2 py-3">
+                {session?.user?.email && (
+                  <div className="rounded-md bg-background/70 px-3 py-2 text-xs text-muted-foreground shadow-sm">
+                    <span className="block truncate font-medium text-foreground">{session.user.email}</span>
+                    <span className="text-[10px] uppercase tracking-wide text-muted-foreground/80">
+                      Signed in
+                    </span>
+                  </div>
+                )}
+                <Button size="sm" variant="outline" className="w-full" onClick={handleSignOut}>
+                  <LogOut className="h-4 w-4 mr-2" /> Sign Out
+                </Button>
+              </div>
+            </SidebarFooter>
+          </Sidebar>
+          <SidebarInset className="flex-1">
+            {/* Top bar */}
+            <div className="sticky top-0 z-30 border-b bg-background/70 backdrop-blur">
+              <div className="flex h-16 items-center gap-3 px-4 md:px-8">
+                <SidebarTrigger className="rounded-full border bg-background/80 shadow-sm" />
+                <div className="flex flex-col">
+                  <span className="text-xs uppercase tracking-wide text-muted-foreground">
+                    Admin Workspace
+                  </span>
+                  <span className="text-base font-semibold text-foreground">
+                    {currentNav?.label ?? 'Dashboard'}
+                  </span>
+                </div>
+                <div className="ml-auto flex items-center gap-3">
+                  {session?.user?.email && (
+                    <div className="hidden rounded-full border bg-background px-3 py-1 text-xs text-muted-foreground md:flex">
+                      {session.user.email}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-          {/* Page content */}
-          <main id="main" className="container py-4 md:py-6 lg:py-8">{children}</main>
-        </SidebarInset>
+            {/* Page content */}
+            <main
+              id="main"
+              className="relative mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 pb-8 pt-6 md:px-8 md:pt-10"
+            >
+              {children}
+            </main>
+          </SidebarInset>
+        </div>
       </div>
     </SidebarProvider>
   )

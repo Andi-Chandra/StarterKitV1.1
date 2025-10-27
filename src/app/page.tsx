@@ -112,8 +112,6 @@ export default function Home() {
   // Transform data for components
   const imageSlides = transformImageSliders(sliders)
   const videoSlides = transformVideoSliders(sliders)
-  const heroSlide = imageSlides[0]
-  const secondarySlides = imageSlides.slice(1)
 
   const highlights = [
     {
@@ -142,6 +140,28 @@ export default function Home() {
 
       {/* Main Content */}
       <main id="main" className="relative">
+        {/* Image Slider */}
+        {imageSlides.length > 0 && (
+          <section className="border-b border-border/60 bg-background py-16">
+            <div className="container space-y-10">
+              <div className="mx-auto flex w-full max-w-4xl flex-col gap-3 text-center">
+                <Badge className="mx-auto w-fit bg-primary/10 text-primary">Featured moments</Badge>
+                <h2 className="text-3xl font-bold">Stories from the harbour</h2>
+                <p className="text-muted-foreground">
+                  A rotating look at the latest imagery from operations, communities, and special initiatives.
+                </p>
+              </div>
+              <ImageSlider
+                slides={imageSlides}
+                autoPlay
+                autoPlayInterval={5000}
+                showArrows
+                showDots
+              />
+            </div>
+          </section>
+        )}
+
         {/* Highlights Section */}
         <section className="border-b border-border/60 bg-muted/40 py-16">
           <div className="container">

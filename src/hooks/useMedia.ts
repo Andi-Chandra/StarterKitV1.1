@@ -86,8 +86,8 @@ export function useMedia() {
           return
         }
         const mediaData = await mediaResponse.json()
-        
-        setMediaItems(mediaData.mediaItems || [])
+        const rawMediaItems: MediaItem[] = mediaData.mediaItems || []
+        setMediaItems(rawMediaItems)
         setCategories(mediaData.categories || [])
 
         // Fetch sliders
@@ -105,8 +105,29 @@ export function useMedia() {
           return
         }
         const slidersData = await slidersResponse.json()
-        
-        setSliders(slidersData.sliders || [])
+        const sliders = slidersData.sliders || []
+        setSliders(sliders)
+
+        const sliderImageIds = new Set<string>()
+        sliders.forEach((slider) => {
+          if ((slider.type ?? '').toUpperCase() === 'IMAGE' && Array.isArray(slider.items)) {
+            slider.items.forEach((item: any) => {
+              const mediaId = item.media?.id || item.mediaId
+              if (mediaId) {
+                sliderImageIds.add(mediaId)
+              }
+            })
+          }
+        })
+
+        if (sliderImageIds.size > 0) {
+          setMediaItems((prev) =>
+            prev.filter((item) => {
+              if ((item.fileType ?? '').toUpperCase() !== 'IMAGE') return true
+              return !sliderImageIds.has(item.id)
+            })
+          )
+        }
 
         // For now, use mock navigation data since we don't have API for it yet
         setNavigationLinks([

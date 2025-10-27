@@ -15,6 +15,25 @@ function shouldProdFallback() {
   return v === 'true' || v === '1'
 }
 
+function normalizeMediaUrl(url: string, fileType?: string | null) {
+  if (!url) return url
+  const type = fileType?.toUpperCase?.() ?? ''
+  if (type !== 'VIDEO') return url
+  try {
+    const parsed = new URL(url)
+    parsed.searchParams.delete('width')
+    parsed.searchParams.delete('height')
+    parsed.searchParams.delete('resize')
+    if (parsed.pathname.includes('/render/image/')) {
+      const [, rest] = parsed.pathname.split('/render/image/')
+      parsed.pathname = `/storage/v1/object/${rest}`
+    }
+    return parsed.toString()
+  } catch {
+    return url
+  }
+}
+
 const querySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
@@ -154,22 +173,10 @@ export async function GET(request: NextRequest) {
     })
     const mediaItems = mediaItemsRaw.map((item) => {
       const fileType = item.fileType?.toUpperCase?.() ?? item.fileType
-      let fileUrl = item.fileUrl
-      if (fileType === 'VIDEO' && typeof fileUrl === 'string') {
-        try {
-          const parsed = new URL(fileUrl)
-          parsed.searchParams.delete('width')
-          parsed.searchParams.delete('height')
-          parsed.searchParams.delete('resize')
-          fileUrl = parsed.toString()
-        } catch {
-          // ignore malformed URLs
-        }
-      }
       return {
         ...item,
         fileType,
-        fileUrl,
+        fileUrl: normalizeMediaUrl(item.fileUrl, fileType),
       }
     })
 
@@ -282,7 +289,7 @@ export async function POST(request: NextRequest) {
         id: randomUUID(),
         title,
         description,
-        fileUrl,
+        fileUrl: normalizeMediaUrl(fileUrl, normalizedType),
         fileType: normalizedType,
         categoryId: categoryId || null,
         isFeatured,

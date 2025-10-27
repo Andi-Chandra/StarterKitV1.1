@@ -7,6 +7,45 @@ import { requireSupabaseUser } from '@/lib/auth-server'
 import { Prisma } from '@prisma/client'
 import { randomUUID } from 'crypto'
 
+function normalizeMediaUrl(url: string | null | undefined, fileType?: string | null) {
+  if (!url) return url
+  const type = fileType?.toUpperCase?.() ?? ''
+  if (type !== 'VIDEO') return url
+  try {
+    const parsed = new URL(url)
+    parsed.searchParams.delete('width')
+    parsed.searchParams.delete('height')
+    parsed.searchParams.delete('resize')
+    if (parsed.pathname.includes('/render/image/')) {
+      const [, rest] = parsed.pathname.split('/render/image/')
+      parsed.pathname = `/storage/v1/object/${rest}`
+    }
+    return parsed.toString()
+  } catch {
+    return url
+  }
+}
+
+function transformSlider(slider: any) {
+  if (!slider) return slider
+  return {
+    ...slider,
+    type: slider.type?.toUpperCase?.() ?? slider.type,
+    items: Array.isArray(slider.items)
+      ? slider.items.map((item: any) => ({
+          ...item,
+          media: item.media
+            ? {
+                ...item.media,
+                fileType: item.media.fileType?.toUpperCase?.() ?? item.media.fileType,
+                fileUrl: normalizeMediaUrl(item.media.fileUrl, item.media.fileType),
+              }
+            : null,
+        }))
+      : slider.items,
+  }
+}
+
 const updateSliderSchema = z.object({
   name: z.string().optional(),
   type: z.enum(['IMAGE', 'VIDEO']).optional(),
@@ -87,7 +126,7 @@ export async function PATCH(
 
     return NextResponse.json({
       message: 'Slider updated successfully',
-      slider: updatedSlider
+      slider: transformSlider(updatedSlider)
     })
 
   } catch (error) {
@@ -185,7 +224,7 @@ export async function GET(
     if (!slider) {
       return NextResponse.json({ message: 'Slider not found' }, { status: 404 })
     }
-    return NextResponse.json({ slider })
+    return NextResponse.json({ slider: transformSlider(slider) })
   } catch (error) {
     console.error('Get slider error:', error)
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 })

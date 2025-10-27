@@ -16,6 +16,45 @@ function shouldProdFallback() {
   return v === 'true' || v === '1'
 }
 
+function normalizeMediaUrl(url: string | null | undefined, fileType?: string | null) {
+  if (!url) return url
+  const type = fileType?.toUpperCase?.() ?? ''
+  if (type !== 'VIDEO') return url
+  try {
+    const parsed = new URL(url)
+    parsed.searchParams.delete('width')
+    parsed.searchParams.delete('height')
+    parsed.searchParams.delete('resize')
+    if (parsed.pathname.includes('/render/image/')) {
+      const [, rest] = parsed.pathname.split('/render/image/')
+      parsed.pathname = `/storage/v1/object/${rest}`
+    }
+    return parsed.toString()
+  } catch {
+    return url
+  }
+}
+
+function transformSlider(slider: any) {
+  if (!slider) return slider
+  return {
+    ...slider,
+    type: slider.type?.toUpperCase?.() ?? slider.type,
+    items: Array.isArray(slider.items)
+      ? slider.items.map((item: any) => ({
+          ...item,
+          media: item.media
+            ? {
+                ...item.media,
+                fileType: item.media.fileType?.toUpperCase?.() ?? item.media.fileType,
+                fileUrl: normalizeMediaUrl(item.media.fileUrl, item.media.fileType),
+              }
+            : null,
+        }))
+      : slider.items,
+  }
+}
+
 function mockSliders() {
   const now = new Date().toISOString()
   return [
@@ -146,8 +185,10 @@ export async function GET(request: NextRequest) {
       }
     })
 
+    const normalized = sliders.map(transformSlider)
+
     return NextResponse.json(
-      { sliders },
+      { sliders: normalized },
       { headers: { 'Cache-Control': 'no-store' } }
     )
 
@@ -256,6 +297,9 @@ export async function POST(request: NextRequest) {
       where: { id: slider.id },
       include: {
         items: {
+          include: {
+            media: true,
+          },
           orderBy: {
             sortOrder: 'asc'
           }
@@ -265,7 +309,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       message: 'Slider created successfully',
-      slider: completeSlider
+      slider: transformSlider(completeSlider)
     })
 
   } catch (error) {

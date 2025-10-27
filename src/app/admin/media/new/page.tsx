@@ -55,7 +55,7 @@ export default function NewMediaPage() {
     let ignore = false
     async function loadCategories() {
       try {
-        const res = await fetch('/api/media/categories')
+        const res = await fetch('/api/media/categories', { cache: 'no-store' })
         if (!res.ok) throw new Error('failed')
         const json = await res.json()
         if (!ignore && Array.isArray(json.categories)) {

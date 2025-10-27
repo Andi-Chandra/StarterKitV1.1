@@ -77,13 +77,21 @@ export default function EditSliderPage() {
     async function fetchMedia() {
       try {
         setIsLoadingMedia(true)
-        const res = await fetch(`/api/media?limit=100&type=${formData.type}`)
-        if (!res.ok) { setMediaOptions([]); return }
-        const data = await res.json()
-        const items: any[] = data.mediaItems || []
-        const options = items
-          .filter((m) => m.fileType === formData.type)
-          .map((m) => ({ id: m.id, title: m.title, fileUrl: m.fileUrl, fileType: m.fileType }))
+        const res = await fetch(`/api/media?limit=100&type=${formData.type}`, { cache: 'no-store' })
+        let options: Array<{ id: string; title: string; fileUrl: string; fileType: 'IMAGE' | 'VIDEO' }> = []
+        if (res.ok) {
+          const data = await res.json()
+          const items: any[] = data.mediaItems || []
+          options = items
+            .filter((m) => (m.fileType || '').toUpperCase() === formData.type)
+            .map((m) => ({ id: m.id, title: m.title, fileUrl: m.fileUrl, fileType: (m.fileType || '').toUpperCase() }))
+        } else {
+          const fallback = await fetch('/api/media?limit=100', { cache: 'no-store' }).then(r => r.ok ? r.json() : { mediaItems: [] }).catch(() => ({ mediaItems: [] }))
+          const items: any[] = fallback.mediaItems || []
+          options = items
+            .filter((m) => (m.fileType || '').toUpperCase() === formData.type)
+            .map((m) => ({ id: m.id, title: m.title, fileUrl: m.fileUrl, fileType: (m.fileType || '').toUpperCase() }))
+        }
         setMediaOptions(options)
         // Drop any selected media that no longer matches type
         setSliderItems(prev => prev.map(it => ({ ...it, mediaId: options.find(o => o.id === it.mediaId) ? it.mediaId : '' })))

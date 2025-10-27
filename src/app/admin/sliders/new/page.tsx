@@ -68,15 +68,20 @@ export default function NewSliderPage() {
       try {
         setIsLoadingMedia(true)
         const type = formData.type
-        const res = await fetch(`/api/media?limit=100&type=${type}`)
-        if (!res.ok) {
-          setMediaOptions([])
-          return
+        const res = await fetch(`/api/media?limit=100&type=${type}`, { cache: 'no-store' })
+        let items: MediaOption[] = []
+        if (res.ok) {
+          const data = await res.json()
+          items = (data.mediaItems || [])
+            .filter((m: any) => (m.fileType || '').toUpperCase() === type)
+            .map((m: any) => ({ id: m.id, title: m.title, fileUrl: m.fileUrl, fileType: (m.fileType || '').toUpperCase() }))
+        } else {
+          // fallback: fetch without filter so we can at least populate options
+          const fallback = await fetch('/api/media?limit=100', { cache: 'no-store' }).then(r => r.ok ? r.json() : { mediaItems: [] }).catch(() => ({ mediaItems: [] }))
+          items = (fallback.mediaItems || [])
+            .filter((m: any) => (m.fileType || '').toUpperCase() === type)
+            .map((m: any) => ({ id: m.id, title: m.title, fileUrl: m.fileUrl, fileType: (m.fileType || '').toUpperCase() }))
         }
-        const data = await res.json()
-        const items: MediaOption[] = (data.mediaItems || [])
-          .filter((m: any) => m.fileType === type)
-          .map((m: any) => ({ id: m.id, title: m.title, fileUrl: m.fileUrl, fileType: m.fileType }))
         setMediaOptions(items)
         // If slider type changed, clear any previously selected media if mismatched
         setSliderItems(prev => prev.map(it => ({ ...it, mediaId: items.find(i => i.id === it.mediaId) ? it.mediaId : '' })))

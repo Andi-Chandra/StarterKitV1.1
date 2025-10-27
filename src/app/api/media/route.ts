@@ -122,13 +122,18 @@ export async function GET(request: NextRequest) {
     const where: any = {}
     if (categoryId) where.categoryId = categoryId
     if (featured === 'true') where.isFeatured = true
-    if (type) where.fileType = type
+    if (type) {
+      where.fileType = {
+        equals: type,
+        mode: 'insensitive',
+      } as Prisma.StringFilter
+    }
 
     // Get total count
     const total = await db.mediaItem.count({ where })
 
     // Get media items
-    const mediaItems = await db.mediaItem.findMany({
+    const mediaItemsRaw = await db.mediaItem.findMany({
       where,
       include: {
         category: true,
@@ -147,6 +152,10 @@ export async function GET(request: NextRequest) {
       skip,
       take: limit
     })
+    const mediaItems = mediaItemsRaw.map((item) => ({
+      ...item,
+      fileType: item.fileType?.toUpperCase?.() ?? item.fileType,
+    }))
 
     // Also return categories for convenience (used by some hooks)
     const categories = await db.mediaCategory.findMany({
@@ -249,6 +258,7 @@ export async function POST(request: NextRequest) {
     }
     const body = await request.json()
     const { title, description, fileUrl, fileType, categoryId, isFeatured } = createMediaSchema.parse(body)
+    const normalizedType = fileType.toUpperCase() as 'IMAGE' | 'VIDEO'
 
     // Create media item
     const mediaItem = await db.mediaItem.create({
@@ -257,7 +267,7 @@ export async function POST(request: NextRequest) {
         title,
         description,
         fileUrl,
-        fileType,
+        fileType: normalizedType,
         categoryId: categoryId || null,
         isFeatured,
       },

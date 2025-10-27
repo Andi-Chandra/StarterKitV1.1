@@ -72,7 +72,7 @@ export default function AdminMediaPage() {
 
   const fetchMediaItems = async () => {
     try {
-      const response = await fetch('/api/media')
+      const response = await fetch('/api/media', { cache: 'no-store' })
       if (response.ok) {
         const data = await response.json()
         setMediaItems(data.mediaItems || [])
@@ -86,7 +86,7 @@ export default function AdminMediaPage() {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('/api/media/categories')
+      const response = await fetch('/api/media/categories', { cache: 'no-store' })
       if (response.ok) {
         const data = await response.json()
         setCategories(data.categories || [])

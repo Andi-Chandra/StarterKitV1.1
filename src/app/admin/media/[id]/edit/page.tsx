@@ -39,7 +39,7 @@ export default function EditMediaPage() {
       try {
         const [mediaRes, catRes] = await Promise.all([
           fetch(`/api/media/${params.id}`),
-          fetch('/api/media/categories'),
+          fetch('/api/media/categories', { cache: 'no-store' }),
         ])
         if (!mediaRes.ok) throw new Error('Failed to load media')
         const mediaData = await mediaRes.json()

@@ -29,6 +29,7 @@ interface ImageSliderProps {
   pauseOnFocus?: boolean
   imageFit?: 'cover' | 'contain'
   heightClass?: string
+  aspectRatio?: string | number
   ariaLabel?: string
   className?: string
 }
@@ -44,6 +45,7 @@ export function ImageSlider({
   pauseOnFocus = true,
   imageFit = 'contain',
   heightClass = 'aspect-video',
+  aspectRatio,
   ariaLabel = 'Image Slider',
   className
 }: ImageSliderProps) {
@@ -217,7 +219,10 @@ export function ImageSlider({
               <Card className="border-0 rounded-none overflow-hidden">
                 <CardContent className="p-0 relative">
                   {/* Background Image */}
-                  <div className={cn("relative w-full bg-black", heightClass)}>
+                  <div
+                    className={cn("relative w-full overflow-hidden bg-black", heightClass)}
+                    style={aspectRatio ? { aspectRatio } : undefined}
+                  >
                     <ImageWithFallback
                       src={slide.imageUrl}
                       alt={slide.title}

@@ -15,7 +15,6 @@ import { Play, ArrowRight, Star, Users, Zap, Video } from 'lucide-react'
 import { useMedia } from '@/hooks/useMedia'
 import { transformImageSliders, transformVideoSliders } from '@/lib/dataTransform'
 import { Skeleton } from '@/components/ui/skeleton'
-import { cn } from '@/lib/utils'
 import { ImageWithFallback } from '@/components/ui/ImageWithFallback'
 
 function LoadingSkeleton() {
@@ -143,15 +142,33 @@ export default function Home() {
         {/* Image Slider */}
         {imageSlides.length > 0 && (
           <section className="border-b border-border/60 bg-background py-16">
-            <div className="container space-y-10">
-              <div className="mx-auto flex w-full max-w-3xl flex-col gap-3 text-center">
-                <Badge className="mx-auto w-fit bg-primary/10 text-primary">Featured moments</Badge>
-                <h2 className="text-3xl font-bold">Stories from the harbour</h2>
-                <p className="text-muted-foreground">
-                  A rotating look at the latest imagery from operations, communities, and special initiatives.
-                </p>
+            <div className="container grid gap-12 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-center">
+              <div className="flex flex-col items-center gap-6 text-center lg:items-start lg:text-left">
+                <Badge className="w-fit bg-primary/10 text-primary">Featured moments</Badge>
+                <div className="space-y-4">
+                  <h1 className="text-3xl font-bold md:text-5xl">
+                    Stories from the harbour
+                  </h1>
+                  <p className="text-lg text-muted-foreground">
+                    A rotating look at the latest imagery from operations, communities, and special initiatives.
+                  </p>
+                </div>
+                <div className="flex flex-wrap justify-center gap-4 lg:justify-start">
+                  <Button asChild size="lg" className="gap-2">
+                    <Link href="#gallery">
+                      Explore the library
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                  <Button variant="outline" size="lg" asChild className="gap-2">
+                    <Link href="#videos">
+                      <Play className="h-4 w-4" />
+                      Watch impact stories
+                    </Link>
+                  </Button>
+                </div>
               </div>
-              <div className="mx-auto flex w-full max-w-5xl justify-center px-4">
+              <div className="relative mx-auto w-full max-w-4xl lg:mx-0">
                 <div className="w-full overflow-hidden rounded-3xl border border-border/60 bg-background shadow-xl">
                   <ImageSlider
                     slides={imageSlides}
@@ -159,6 +176,8 @@ export default function Home() {
                     autoPlayInterval={5000}
                     showArrows
                     showDots
+                    imageFit="cover"
+                    aspectRatio="5 / 3"
                   />
                 </div>
               </div>

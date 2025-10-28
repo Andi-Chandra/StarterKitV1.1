@@ -149,23 +149,8 @@ export default function Home() {
         {imageSlides.length > 0 && (
           <HeroImageSlider
             slides={imageSlides}
-            eyebrow="Featured moments"
-            heading="Stories from the harbour"
-            description="A rotating look at the latest imagery from operations, communities, and special initiatives."
             className="relative overflow-hidden border-none bg-gradient-to-br from-background via-primary/10 to-background pb-24 pt-20"
-            contentAlignment="left"
             heightClass="aspect-[16/9] lg:aspect-[5/3]"
-            primaryCta={{
-              label: 'Browse the media library',
-              href: '#gallery',
-              icon: ArrowRight,
-            }}
-            secondaryCta={{
-              label: 'Watch latest stories',
-              href: '#videos',
-              icon: Video,
-              variant: 'outline',
-            }}
           />
         )}
 

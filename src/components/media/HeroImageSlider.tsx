@@ -1,9 +1,9 @@
 'use client'
 
-import { type ComponentType, useEffect, useMemo, useState } from 'react'
+'use client'
+
+import { useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
-import { ArrowRight, Play } from 'lucide-react'
 
 import {
   Carousel,
@@ -14,7 +14,6 @@ import {
   type CarouselApi,
 } from '@/components/ui/carousel'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { ImageSlideData } from '@/lib/dataTransform'
 
@@ -66,17 +65,6 @@ interface HeroImageSliderProps {
   eyebrow?: string
   heading: string
   description?: string
-  primaryCta?: {
-    label: string
-    href: string
-    icon?: ComponentType<{ className?: string }>
-  }
-  secondaryCta?: {
-    label: string
-    href: string
-    icon?: ComponentType<{ className?: string }>
-    variant?: 'outline' | 'ghost'
-  }
   className?: string
   contentAlignment?: 'left' | 'center'
 }
@@ -95,23 +83,9 @@ export function HeroImageSlider({
   eyebrow,
   heading,
   description,
-  primaryCta = {
-    label: 'Browse the media library',
-    href: '#gallery',
-    icon: ArrowRight,
-  },
-  secondaryCta = {
-    label: 'Watch impact stories',
-    href: '#videos',
-    icon: Play,
-    variant: 'outline',
-  },
   className,
   contentAlignment = 'left',
 }: HeroImageSliderProps) {
-  const PrimaryIcon = primaryCta?.icon
-  const SecondaryIcon = secondaryCta?.icon
-
   const preparedSlides = useMemo<SliderItem[]>(() => {
     const validSlides = slides
       .filter((slide) => slide?.imageUrl)
@@ -224,29 +198,6 @@ export function HeroImageSlider({
               <p className="text-lg text-muted-foreground">
                 {description}
               </p>
-            )}
-          </div>
-          <div className="flex flex-wrap justify-center gap-4 lg:justify-start">
-            {primaryCta && (
-              <Button asChild size="lg" className="gap-2">
-                <Link href={primaryCta.href}>
-                  {primaryCta.label}
-                  {PrimaryIcon && <PrimaryIcon className="h-4 w-4" />}
-                </Link>
-              </Button>
-            )}
-            {secondaryCta && (
-              <Button
-                variant={secondaryCta.variant ?? 'outline'}
-                size="lg"
-                asChild
-                className="gap-2"
-              >
-                <Link href={secondaryCta.href}>
-                  {SecondaryIcon && <SecondaryIcon className="h-4 w-4" />}
-                  {secondaryCta.label}
-                </Link>
-              </Button>
             )}
           </div>
         </div>

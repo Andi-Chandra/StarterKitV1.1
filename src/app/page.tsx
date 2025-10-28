@@ -168,7 +168,7 @@ export default function Home() {
                   </Button>
                 </div>
               </div>
-              <div className="relative mx-auto w-full max-w-4xl lg:mx-0">
+              <div className="relative mx-auto w-full max-w-[1920px] lg:mx-0">
                 <div className="w-full overflow-hidden rounded-3xl border border-border/60 bg-background shadow-xl">
                   <ImageSlider
                     slides={imageSlides}
@@ -177,7 +177,7 @@ export default function Home() {
                     showArrows
                     showDots
                     imageFit="cover"
-                    aspectRatio="5 / 3"
+                    heightClass="aspect-[16/9]"
                   />
                 </div>
               </div>

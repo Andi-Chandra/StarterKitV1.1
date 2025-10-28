@@ -58,7 +58,7 @@ export function HeroImageSlider({
   showArrows = true,
   showDots = true,
   imageFit = 'contain',
-  heightClass = 'h-[60vh] md:h-[80vh]',
+  heightClass = 'h-[40vh] md:h-[50vh] lg:h-[60vh]',
   ariaLabel = 'Hero image slider',
   className,
 }: HeroImageSliderProps) {

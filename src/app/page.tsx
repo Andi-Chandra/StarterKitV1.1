@@ -150,7 +150,7 @@ export default function Home() {
           <HeroImageSlider
             slides={imageSlides}
             className="relative overflow-hidden border-none bg-gradient-to-br from-background via-primary/10 to-background pb-24 pt-20"
-            heightClass="ah-[45vh] md:h-[55vh] lg:h-[65vh]"
+            heightClass="h-[45vh] md:h-[55vh] lg:h-[65vh]"
           />
         )}
 

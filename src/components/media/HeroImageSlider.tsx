@@ -45,8 +45,12 @@ const FALLBACK_SLIDES: SliderItem[] = [
 
 interface HeroImageSliderProps {
   slides: ImageSlideData[]
+  autoPlay?: boolean
+  autoPlayInterval?: number
   showArrows?: boolean
   showDots?: boolean
+  pauseOnHover?: boolean
+  pauseOnFocus?: boolean
   imageFit?: 'cover' | 'contain'
   heightClass?: string
   ariaLabel?: string
@@ -55,8 +59,12 @@ interface HeroImageSliderProps {
 
 export function HeroImageSlider({
   slides,
+  autoPlay = true,
+  autoPlayInterval = 5000,
   showArrows = true,
   showDots = true,
+  pauseOnHover = true,
+  pauseOnFocus = true,
   imageFit = 'contain',
   heightClass = 'h-[40vh] md:h-[50vh] lg:h-[60vh]',
   ariaLabel = 'Hero image slider',
@@ -77,6 +85,7 @@ export function HeroImageSlider({
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set())
   const [activeIndex, setActiveIndex] = useState(0)
   const [carouselApi, setCarouselApi] = useState<CarouselApi>()
+  const [isPaused, setIsPaused] = useState(false)
 
   useEffect(() => {
     if (!carouselApi) return
@@ -101,12 +110,46 @@ export function HeroImageSlider({
     }
   }, [carouselApi, preparedSlides])
 
+  useEffect(() => {
+    if (!carouselApi || !autoPlay || isPaused || preparedSlides.length <= 1) return
+
+    const intervalId = setInterval(() => {
+      carouselApi.scrollNext()
+    }, autoPlayInterval)
+
+    return () => clearInterval(intervalId)
+  }, [carouselApi, autoPlay, autoPlayInterval, isPaused, preparedSlides.length])
+
   const handleImageError = (id: string) => {
     setImageErrors(prev => {
       const next = new Set(prev)
       next.add(id)
       return next
     })
+  }
+
+  const handleMouseEnter = () => {
+    if (pauseOnHover) {
+      setIsPaused(true)
+    }
+  }
+
+  const handleMouseLeave = () => {
+    if (pauseOnHover) {
+      setIsPaused(false)
+    }
+  }
+
+  const handleFocus = () => {
+    if (pauseOnFocus) {
+      setIsPaused(true)
+    }
+  }
+
+  const handleBlur = () => {
+    if (pauseOnFocus) {
+      setIsPaused(false)
+    }
   }
 
   return (
@@ -116,6 +159,10 @@ export function HeroImageSlider({
         opts={{ loop: true }}
         setApi={setCarouselApi}
         aria-label={ariaLabel}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onFocusCapture={handleFocus}
+        onBlurCapture={handleBlur}
       >
         <CarouselContent>
           {preparedSlides.map((slide, index) => {

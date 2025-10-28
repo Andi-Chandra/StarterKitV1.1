@@ -18,7 +18,7 @@ interface SlideItem {
   callToActionUrl?: string
 }
 
-interface ImageSliderProps {
+export interface ImageSliderProps {
   slides: SlideItem[]
   autoPlay?: boolean
   autoPlayInterval?: number

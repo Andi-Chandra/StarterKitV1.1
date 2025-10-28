@@ -4,14 +4,14 @@ import Link from 'next/link'
 import { useEffect } from 'react'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
-import { ImageSlider } from '@/components/media/ImageSlider'
+import { HeroImageSlider } from '@/components/media/HeroImageSlider'
 import { VideoSlider } from '@/components/media/VideoSlider'
 import { Gallery } from '@/components/media/Gallery'
 import { Button } from '@/components/ui/button'
 import { useSession } from '@/components/providers/session-provider'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Play, ArrowRight, Star, Users, Zap, Video } from 'lucide-react'
+import { ArrowRight, Star, Users, Zap, Video } from 'lucide-react'
 import { useMedia } from '@/hooks/useMedia'
 import { transformImageSliders, transformVideoSliders } from '@/lib/dataTransform'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -130,6 +130,12 @@ export default function Home() {
     },
   ]
 
+  const stats = [
+    { value: '35+', label: 'Community partners engaged' },
+    { value: '12K', label: 'Monthly visitors across platforms' },
+    { value: '1.2K', label: 'Curated images and video assets' },
+  ]
+
   const latestMedia = mediaItems.slice(0, 3)
 
   return (
@@ -138,76 +144,72 @@ export default function Home() {
       <Header navigationLinks={navigationLinks} />
 
       {/* Main Content */}
-      <main id="main" className="relative space-y-20">
-        {/* Image Slider */}
+      <main id="main" className="relative space-y-24">
+        {/* Hero Image Slider */}
         {imageSlides.length > 0 && (
-          <section className="border-b border-border/60 bg-background py-16">
-            <div className="container grid gap-12 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-center">
-              <div className="flex flex-col items-center gap-6 text-center lg:items-start lg:text-left">
-                <Badge className="w-fit bg-primary/10 text-primary">Featured moments</Badge>
-                <div className="space-y-4">
-                  <h1 className="text-3xl font-bold md:text-5xl">
-                    Stories from the harbour
-                  </h1>
-                  <p className="text-lg text-muted-foreground">
-                    A rotating look at the latest imagery from operations, communities, and special initiatives.
-                  </p>
-                </div>
-                <div className="flex flex-wrap justify-center gap-4 lg:justify-start">
-                  <Button asChild size="lg" className="gap-2">
-                    <Link href="#gallery">
-                      Explore the library
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                  <Button variant="outline" size="lg" asChild className="gap-2">
-                    <Link href="#videos">
-                      <Play className="h-4 w-4" />
-                      Watch impact stories
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-              <div className="relative mx-auto w-full max-w-[1920px] lg:mx-0">
-                <div className="w-full overflow-hidden rounded-3xl border border-border/60 bg-background shadow-xl">
-                  <ImageSlider
-                    slides={imageSlides}
-                    autoPlay
-                    autoPlayInterval={5000}
-                    showArrows
-                    showDots
-                    imageFit="cover"
-                    heightClass="aspect-[16/9]"
-                  />
-                </div>
-              </div>
-            </div>
-          </section>
+          <HeroImageSlider
+            slides={imageSlides}
+            eyebrow="Featured moments"
+            heading="Stories from the harbour"
+            description="A rotating look at the latest imagery from operations, communities, and special initiatives."
+            className="relative overflow-hidden border-none bg-gradient-to-br from-background via-primary/10 to-background pb-24 pt-20"
+            contentAlignment="left"
+            heightClass="aspect-[16/9] lg:aspect-[5/3]"
+            primaryCta={{
+              label: 'Browse the media library',
+              href: '#gallery',
+              icon: ArrowRight,
+            }}
+            secondaryCta={{
+              label: 'Watch latest stories',
+              href: '#videos',
+              icon: Video,
+              variant: 'outline',
+            }}
+          />
         )}
 
         {/* Highlights Section */}
-        <section className="border-b border-border/60 bg-muted/40 py-16">
-          <div className="container">
-            <div className="mx-auto max-w-4xl text-center">
+        <section className="relative overflow-hidden border-b border-border/60 bg-gradient-to-br from-background via-muted/40 to-background py-24">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" aria-hidden="true" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.12),_transparent_60%)]" aria-hidden="true" />
+          <div className="container relative">
+            <div className="mx-auto max-w-5xl text-center">
               <Badge className="mx-auto mb-4 w-fit bg-primary/10 text-primary">Why it matters</Badge>
-              <h2 className="text-3xl font-bold">Serving Belawan with clarity and momentum</h2>
-              <p className="mt-3 text-muted-foreground">
-                We combine storytelling, data, and modern design to highlight the mission of PPS Belawan and the
-                communities it supports.
+              <h2 className="text-3xl font-bold md:text-4xl">Serving Belawan with clarity and momentum</h2>
+              <p className="mt-4 text-lg text-muted-foreground">
+                We combine storytelling, data, and modern design to highlight the mission of PPS Belawan and the communities it supports.
               </p>
             </div>
 
-            <div className="mt-10 grid gap-6 md:grid-cols-3">
+            <div className="mt-10 grid gap-4 sm:grid-cols-3">
+              {stats.map((stat) => (
+                <div key={stat.label} className="rounded-2xl border border-border/60 bg-background/80 p-6 text-center shadow-sm backdrop-blur transition hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg">
+                  <p className="text-3xl font-semibold text-primary">{stat.value}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{stat.label}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {highlights.map((highlight) => (
-                <Card key={highlight.title} className="border border-border/60 shadow-sm transition hover:border-primary/40">
-                  <CardHeader className="flex flex-row items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <Card
+                  key={highlight.title}
+                  className="group relative overflow-hidden border border-border/60 bg-background/80 shadow-sm backdrop-blur transition hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg"
+                >
+                  <div className="absolute inset-x-0 top-0 h-1 opacity-60 transition-opacity duration-500 group-hover:opacity-100">
+                    <div className="h-full w-full bg-gradient-to-r from-primary/70 via-primary/20 to-transparent" />
+                  </div>
+                  <CardHeader className="flex flex-row items-center gap-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary ring-1 ring-primary/20 transition group-hover:bg-primary group-hover:text-primary-foreground">
                       <highlight.icon className="h-5 w-5" />
                     </div>
                     <CardTitle className="text-lg">{highlight.title}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <CardDescription className="text-sm text-muted-foreground">{highlight.description}</CardDescription>
+                    <CardDescription className="text-sm text-muted-foreground">
+                      {highlight.description}
+                    </CardDescription>
                   </CardContent>
                 </Card>
               ))}
@@ -217,74 +219,94 @@ export default function Home() {
 
         {/* Video Slider Section */}
         {videoSlides.length > 0 && (
-          <section id="videos" className="py-20 bg-muted/50">
-            <div className="container">
-              <div className="text-center mb-16">
-                <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                  Video Content
+          <section id="videos" className="relative overflow-hidden border-y border-border/60 bg-gradient-to-b from-background via-background to-muted/40 py-24">
+            <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-primary/10 to-transparent" aria-hidden="true" />
+            <div className="absolute inset-x-16 top-10 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" aria-hidden="true" />
+            <div className="container relative">
+              <div className="mx-auto mb-12 flex max-w-3xl flex-col gap-4 text-center">
+                <Badge className="mx-auto w-fit bg-primary/10 text-primary">Impact stories</Badge>
+                <h2 className="text-3xl font-bold md:text-4xl">
+                  Stories in motion
                 </h2>
-                <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                  Watch our video content.
+                <p className="text-lg text-muted-foreground">
+                  Explore short-form narratives capturing operations, innovation, and community impact across the harbour.
                 </p>
               </div>
 
-              <VideoSlider 
-                videos={videoSlides}
-                autoPlay={false}
-                showArrows={true}
-                showDots={true}
-                showControls={true}
-              />
+              <div className="rounded-3xl border border-border/60 bg-background/90 p-4 shadow-xl backdrop-blur">
+                <VideoSlider
+                  videos={videoSlides}
+                  autoPlay={false}
+                  showArrows={true}
+                  showDots={true}
+                  showControls={true}
+                />
+              </div>
             </div>
           </section>
         )}
 
         {/* Gallery Section */}
         {mediaItems.length > 0 && (
-          <section id="gallery" className="py-20">
-            <div className="container">
-              <div className="text-center mb-16">
-                <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                  Image Gallery
+          <section id="gallery" className="relative overflow-hidden py-24">
+            <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-muted/40 via-transparent to-transparent" aria-hidden="true" />
+            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-muted/40 via-transparent to-transparent" aria-hidden="true" />
+            <div className="container relative">
+              <div className="mx-auto mb-12 flex max-w-3xl flex-col gap-4 text-center">
+                <Badge className="mx-auto w-fit bg-primary/10 text-primary">Media atlas</Badge>
+                <h2 className="text-3xl font-bold md:text-4xl">
+                  Image gallery
                 </h2>
-                <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                  Browse through our collection of stunning images and visuals.
+                <p className="text-lg text-muted-foreground">
+                  Browse a curated archive of visuals ready for press, partners, and community storytellers.
                 </p>
               </div>
-              <Gallery 
-                mediaItems={mediaItems}
-                categories={categories}
-                showSearch={true}
-                showFilters={true}
-              />
+              <div className="rounded-3xl border border-border/60 bg-background/80 p-6 shadow-sm backdrop-blur">
+                <Gallery
+                  mediaItems={mediaItems}
+                  categories={categories}
+                  showSearch={true}
+                  showFilters={true}
+                />
+              </div>
             </div>
           </section>
         )}
 
         {/* Latest Media Section */}
         {latestMedia.length > 0 && (
-          <section className="border-t border-border/60 bg-muted/30 py-20">
-            <div className="container">
-              <div className="mx-auto mb-10 flex w-full max-w-4xl flex-col gap-3 text-center">
+          <section className="relative overflow-hidden border-y border-border/60 bg-gradient-to-br from-background via-muted/30 to-background py-24">
+            <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-primary/10 to-transparent" aria-hidden="true" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,_rgba(59,130,246,0.12),_transparent_55%)]" aria-hidden="true" />
+            <div className="container relative">
+              <div className="mx-auto mb-12 flex w-full max-w-4xl flex-col gap-3 text-center">
                 <Badge className="mx-auto w-fit bg-primary/10 text-primary">Fresh from the library</Badge>
-                <h2 className="text-3xl font-bold">Recently Added Highlights</h2>
+                <h2 className="text-3xl font-bold md:text-4xl">Recently Added Highlights</h2>
                 <p className="text-muted-foreground">
-                  The newest imagery and clips added to the archive—curated for press, stakeholders, and the public.
+                  The newest imagery and clips added to the archive, curated for press, stakeholders, and the public.
                 </p>
               </div>
 
               <div className="grid gap-6 md:grid-cols-3">
                 {latestMedia.map((item) => (
-                  <Card key={item.id} className="h-full overflow-hidden border border-border/60 shadow-sm">
-                    <div className="relative aspect-[4/3] bg-muted">
+                  <Card
+                    key={item.id}
+                    className="group h-full overflow-hidden rounded-2xl border border-border/60 bg-background/80 shadow-sm transition hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg"
+                  >
+                    <div className="relative aspect-[4/3] overflow-hidden bg-muted">
                       {item.fileType === 'IMAGE' ? (
-                        <ImageWithFallback src={item.fileUrl} alt={item.title} fill className="object-cover" />
+                        <ImageWithFallback
+                          src={item.fileUrl}
+                          alt={item.title}
+                          fill
+                          className="object-cover transition duration-700 group-hover:scale-105"
+                        />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center bg-muted">
-                          <Video className="h-8 w-8 text-muted-foreground" />
+                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-muted via-muted/70 to-background text-muted-foreground transition group-hover:text-primary">
+                          <Video className="h-8 w-8" />
                         </div>
                       )}
-                      <Badge className="absolute top-3 left-3 bg-primary text-primary-foreground">
+                      <Badge className="absolute top-3 left-3 bg-primary text-primary-foreground shadow">
                         {item.fileType === 'IMAGE' ? 'Image' : 'Video'}
                       </Badge>
                     </div>
@@ -320,14 +342,16 @@ export default function Home() {
         )}
 
         {/* CTA */}
-        <section className="relative overflow-hidden border-y border-border/60 bg-gradient-to-br from-primary/10 via-background to-background">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.2),_transparent_60%)]" />
-          <div className="container relative py-16">
+        <section className="relative overflow-hidden border-y border-border/60 bg-gradient-to-br from-primary/15 via-background to-background py-24">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.22),_transparent_65%)]" aria-hidden="true" />
+          <div className="absolute -left-24 top-1/2 h-64 w-64 -translate-y-1/2 rounded-full bg-primary/10 blur-3xl" aria-hidden="true" />
+          <div className="absolute -right-24 top-1/3 h-64 w-64 rounded-full bg-primary/10 blur-3xl" aria-hidden="true" />
+          <div className="container relative">
             <div className="mx-auto flex max-w-4xl flex-col gap-6 text-center">
               <Badge className="mx-auto w-fit bg-primary text-primary-foreground">Get involved</Badge>
-              <h2 className="text-3xl font-bold">Partner with PPS Belawan</h2>
-              <p className="text-muted-foreground">
-                Collaborate on new initiatives, share insights, or request access to tailored media kits. We’re here to amplify the work happening across Belawan.
+              <h2 className="text-3xl font-bold md:text-4xl">Partner with PPS Belawan</h2>
+              <p className="text-lg text-muted-foreground">
+                Collaborate on initiatives, share insights, or request tailored media kits. We're here to amplify the work happening across Belawan.
               </p>
               <div className="flex flex-wrap justify-center gap-4">
                 <Button asChild size="lg" className="gap-2">
@@ -336,8 +360,11 @@ export default function Home() {
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
-                <Button variant="outline" size="lg" asChild>
-                  <Link href="#videos">View impact stories</Link>
+                <Button variant="outline" size="lg" asChild className="gap-2">
+                  <Link href="#videos">
+                    <Video className="h-4 w-4" />
+                    View impact stories
+                  </Link>
                 </Button>
               </div>
             </div>
